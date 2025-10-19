@@ -29,7 +29,7 @@ const Expenses = () => {
   return (
     <div style={{
       padding: '20px',
-      backgroundColor: '#2e3166',
+      backgroundColor: '#242650ff',
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center'

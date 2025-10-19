@@ -11,19 +11,24 @@ import { useState } from "react";
 const InvoiceAndPayment = ({ item }) => {
 
   const isInvoice = !useSelector(state => state.Suppliers.IsInSupliers);
-  
+    const formatDateToDisplay = (dateStr) => {
+  if (!dateStr) return '';
+  const [year, month, day] = dateStr.split('-');
+  return `${day}/${month}/${year}`;
+};
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState("success");
   const [newInvoice,setNewInvoice]=useState({
     sum:isInvoice?item.customerInvoiceSum:item.providerInvoiceSum,
     name:isInvoice?item.customerNavigation.customerName:item.provider.providerName,
-    date:isInvoice?item.customerInvoiceDate.split('T')[0]:item.providerInvoiceDate.split('T')[0],
-    paymentDate:isInvoice?item.customerInvoiceMaturitDate.split('T')[0]:item.providerInvoicePaymentDate.split('T')[0],
+    date:isInvoice?formatDateToDisplay(item.customerInvoiceDate.split('T')[0]):formatDateToDisplay(item.providerInvoiceDate.split('T')[0]),
+    paymentDate:isInvoice?formatDateToDisplay(item.customerInvoiceMaturitDate.split('T')[0]):formatDateToDisplay(item.providerInvoicePaymentDate.split('T')[0]),
     details:isInvoice?item.customerInvoiceDetails:item.providerInvoiceDetails,
     reference:isInvoice?item.customerInvoiceNumber:item.providerInvoiceNumber
   });
-  
+
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setNewInvoice((prev) => ({

@@ -1,20 +1,19 @@
 import { FormControl, InputLabel, Select, MenuItem, Typography } from '@mui/material';
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import {fetchCategories} from "../../../redux/CategoryThunk";
+import { fetchCategories } from "../../../redux/CategoryThunk";
 import CircularProgress from '@mui/material/CircularProgress';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 
-
-const ExpenseClassificationButton = ({selectedCategory, setSelectedCategory}) => {
-const isInSupplier=useSelector(state => state.Suppliers.IsInSupliers);
-   const isLoading = useSelector(state => state.category.loading);
-const isError = useSelector(state => state.category.error);
-    const dispatch=useDispatch();
-const allCategory= useSelector(state => state.category.categories) ;
-const filteredCategories = 
-allCategory.filter(category =>
-     category.categoryClassification === (isInSupplier ?  2: 1));
+const ExpenseClassificationButton = ({ sx, selectedCategory, setSelectedCategory,isSupplierCard }) => {
+    const isInSupplier = useSelector(state => state.Suppliers.IsInSupliers);
+    const isLoading = useSelector(state => state.category.loading);
+    const isError = useSelector(state => state.category.error);
+    const dispatch = useDispatch();
+    const allCategory = useSelector(state => state.category.categories);
+    const filteredCategories =
+        allCategory.filter(category =>
+            category.categoryClassification === (isInSupplier ? 2 : 1));
     const handleChange = (event) => {
         setSelectedCategory(event.target.value);
     };
@@ -23,31 +22,34 @@ allCategory.filter(category =>
         dispatch(fetchCategories());
     }, [dispatch]);
 
-     if (isLoading) {
-          return (
-          <div style={{ display: "flex",
-           justifyContent: "center",
-            marginTop: "2rem" ,
-            color: "black"}}>
-                <CircularProgress style={{ color: "black" }} />
-              </div>
-          );
-      
-        }
-    
-       if (isError) {
+    if (isLoading) {
         return (
-           <div style={{
-             display: "flex",
-             alignItems: "center",
-             justifyContent: "center",
-             color: "black",
-             marginTop: "1rem" }}>
-          <ErrorOutlineIcon style={{ marginRight: "0.5rem" }} />
-          <span>שגיאת מערכת</span>
-        </div>
+            <div style={{
+                display: "flex",
+                justifyContent: "center",
+                marginTop: "2rem",
+                color: "black"
+            }}>
+                <CircularProgress style={{ color: "black" }} />
+            </div>
         );
-      }
+
+    }
+
+    if (isError) {
+        return (
+            <div style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "black",
+                marginTop: "1rem"
+            }}>
+                <ErrorOutlineIcon style={{ marginRight: "0.5rem" }} />
+                <span>שגיאת מערכת</span>
+            </div>
+        );
+    }
 
     return (
         <div style={{ width: '100%' }}>
@@ -57,38 +59,33 @@ allCategory.filter(category =>
                     textAlign: 'right',
                     color: 'black',
                     fontSize: '1.125rem', // ≈ 18px
-                    marginBottom: '0.5rem'
+                    marginBottom: '0.5rem',
+                    marginRight: isSupplierCard ? '4.3rem' : undefined,
                 }}
             >
-                {isInSupplier?"סיווג הוצאה": "סיווג הכנסה" }
+                {isInSupplier ? "סיווג הוצאה" : "סיווג הכנסה"}
             </Typography>
 
             <FormControl
                 fullWidth
                 variant="outlined"
-                sx={{
-                    '& .MuiOutlinedInput-root': {
-                        backgroundColor: '#F7C6C2',
-                        '& fieldset': {
-                            borderColor: '#F3BBB3',
-                            borderWidth: '2px', // px מוצדק – עובי מסגרת
-                        },
-                        '&:hover fieldset': {
-                            borderColor: '#F3BBB3',
-                        },
-                        '&.Mui-focused fieldset': {
-                            borderColor: '#F3BBB3',
-                        },
-                    },
-                }}
+                sx={sx}
             >
                 <InputLabel sx={{ fontSize: '1rem' }}></InputLabel>
                 <Select
                     sx={{ fontSize: '1rem', textAlign: 'right' }}
-                    value={selectedCategory}
+                    value={
+                        filteredCategories.some(c => c.categoryId === selectedCategory)
+                            ? selectedCategory
+                            : ""   // ברירת מחדל חוקית
+                    }
                     onChange={handleChange}
+                    displayEmpty
                 >
-                    
+                    <MenuItem value="">
+                        <em>בחר קטגוריה</em>
+                    </MenuItem>
+
                     {filteredCategories.map((category) => (
                         <MenuItem key={category.categoryId} value={category.categoryId}>
                             {category.categoryName}

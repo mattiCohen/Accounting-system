@@ -1,6 +1,6 @@
 import { useSelector } from "react-redux";
 import SupplierNameButton from "./InvoiceAndPayment/SupplierNameButton";
-import YearButton from "./InvoiceAndPayment/YearButton";
+import DateButton from "./InvoiceAndPayment/DateButton";
 import { Box, Typography, Button } from "@mui/material";
 import { useState } from "react";
 
@@ -8,8 +8,9 @@ const PaymentReport = () => {
 
     const IsInsupplier1 = useSelector(state => state.Suppliers.IsInSupliers);
     const [supplier, setSupplier] = useState(null);
-    const [yearBegin, setYearBegin] = useState("");
-    const [yearEnd, setYearEnd] = useState("");
+    const [dateBegin, setYearBegin] = useState("01/01/2021");   
+    const [dateEnd, setYearEnd] = useState("01/01/2026");
+
     return (
         <Box sx={{
             padding: '2rem',
@@ -27,14 +28,14 @@ const PaymentReport = () => {
             flexDirection: 'column',
             gap: 3,
             width: '90%',
-            '@media (max-width: 1200px)': {  // מחשבים ניידים וקטנים יותר
+            '@media (max-width: 1200px)': {  
                 width: '95%',
             },
-            '@media (max-width: 768px)': {  // טאבלטים ומסכים בינוניים
+            '@media (max-width: 768px)': {  
                 width: '100%',
                 padding: '15px',
             },
-            '@media (max-width: 600px)': {  // סמארטפונים
+            '@media (max-width: 600px)': {  
                 width: '100%',
                 padding: '10px',
             }
@@ -125,12 +126,12 @@ const PaymentReport = () => {
                             borderRadius: '4px',
                             padding: '0.4rem',
                         }}>
-                            <YearButton sx={{
+                            <DateButton sx={{
                                 '& .MuiInputBase-root': {
                                     backgroundColor: '#DA9F9A',
                                 }
                             }}
-                            year={yearBegin}
+                            year={dateBegin}
                             setYear={setYearBegin}
                              />
                         </Box>
@@ -146,12 +147,12 @@ const PaymentReport = () => {
                             borderRadius: '4px',
                             padding: '0.3rem',
                         }}>
-                            <YearButton sx={{
+                            <DateButton sx={{
                                 '& .MuiInputBase-root': {
                                     backgroundColor: '#DA9F9A',
                                 }
                             }}
-                            year={yearEnd}
+                            year={dateEnd}
                             setYear={setYearEnd}
                             />
                         </Box>

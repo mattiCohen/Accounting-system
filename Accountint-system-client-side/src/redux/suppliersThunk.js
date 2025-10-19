@@ -2,12 +2,39 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import api from '../api';  // מייבאת את ה-axios
 
+
+export const fetchIsInSuppliers = createAsyncThunk(
+  'uiState/fetchIsInSuppliers',
+  async (_, thunkAPI) => {
+    try {
+      const response = await api.get('/UIState'); // GET boolean from C# singleton
+      return response.data; // true / false
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.response?.data || error.message);
+    }
+  }
+);
+
+// Update state in C# singleton via query string
+export const setIsInSuppliersOnServer = createAsyncThunk(
+  'uiState/setIsInSuppliers',
+  async (isInSuppliers, thunkAPI) => {
+    try {
+      await api.put(`/UIState?isProvider=${isInSuppliers}`); // PUT boolean
+      return isInSuppliers;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.response?.data || error.message);
+    }
+  }
+);
+
 // שליפת כל הספקים
 export const fetchSuppliers = createAsyncThunk(
   'suppliers/fetchSuppliers',
   async (_, thunkAPI) => {
     try {
       const response = await api.get('/provider');  // שליחה של בקשה ל-API
+      console.log("all the suppliers",response.data);
       return response.data; // מחזירה את התשובה (רשימת הספקים)
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response?.data || error.message); // אם יש שגיאה, מחזירה אותה

@@ -21,14 +21,13 @@ const SupplierNameButton = ({ sx, selectedName, setSelectedName }) => {
   const dispatch = useDispatch();
   const list = IsInsupplier1 ? suppliers : customers;
 
-   const options = list.map(item => ({
+  const options = list.map(item => ({
     label: IsInsupplier1 ? item.providerName : item.customerName,
     value: IsInsupplier1 ? item.providerId : item.customerId
   }));
-  
+
   const [inputValue, setInputValue] = useState('');
-
-
+  
   useEffect(() => {
     if (IsInsupplier1) {
       dispatch(fetchSuppliers());
@@ -54,7 +53,7 @@ const SupplierNameButton = ({ sx, selectedName, setSelectedName }) => {
     );
   }
 
- 
+
 
   return (
     <div>
@@ -72,13 +71,13 @@ const SupplierNameButton = ({ sx, selectedName, setSelectedName }) => {
 
       <Autocomplete
         options={options}
-        getOptionLabel={(option) => option.label}
+        getOptionLabel={(option) => option?.label || option?.name || ""}
         value={selectedName || null}
         onChange={(event, newValue) => {
           setSelectedName(newValue);
         }}
         inputValue={inputValue}
-        onInputChange={(event,newInputValue) => setInputValue(newInputValue)}
+        onInputChange={(event, newInputValue) => setInputValue(newInputValue)}
         renderInput={(params) => (
           <TextField
             {...params}
@@ -87,7 +86,7 @@ const SupplierNameButton = ({ sx, selectedName, setSelectedName }) => {
             sx={{ textAlign: 'right', direction: 'rtl', ...sx }}
           />
         )}
-        sx={{ direction: 'rtl', ...sx }}
+        sx={{ direction: 'rtl' }}
       />
     </div>
   );

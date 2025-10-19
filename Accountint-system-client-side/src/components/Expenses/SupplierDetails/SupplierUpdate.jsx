@@ -8,9 +8,8 @@ import CircularProgress from "@mui/material/CircularProgress";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
-
-
-
+import { useRef } from "react";
+import CardNumberButton from "../InvoiceAndPayment/CardNumberButton";
 
 const SupplierUpdate = () => {
 
@@ -22,13 +21,67 @@ const SupplierUpdate = () => {
     const { error, isLoading } = useSelector(state => IsInsupplier1 ? state.Suppliers : state.Customers);
     const [formDisabled, setFormDisabled] = useState(false);
 
-
-    const handleCloseSnackbar = () => {
-        setOpenSnackbar(false);
-        setFormDisabled(false); // Re-enable form
+    const textFieldSx = {
+        backgroundColor: '#F3BBB3',
+        direction: 'rtl',
+        '& .MuiOutlinedInput-root': {
+            direction: 'rtl',
+            '& input': {
+                textAlign: 'right',
+            },
+            '& .MuiOutlinedInput-notchedOutline legend': {
+                textAlign: 'right',
+            },
+            '&.Mui-focused fieldset': {
+                borderColor: '#fff',
+            },
+        },
     };
 
-    // Snackbar states
+    const inputProps = {
+        style: {
+            textAlign: 'right',
+            direction: 'rtl',
+        },
+    };
+
+    const inputLabelProps = {
+        shrink: true,
+        sx: {
+            direction: 'rtl',
+            transformOrigin: 'top right',
+            right: '2.2rem',
+            left: 'unset',
+            color: 'black',
+            fontSize: '1.4rem',
+            '&.Mui-focused': {
+                color: '#fff',
+                fontSize: { xs: '21px', sm: '25px' },
+            },
+        },
+    };
+
+    const refs = {
+        supplierName: useRef(),
+        supplierPhone: useRef(),
+        supplierEmail: useRef(),
+        supplierNumCard: useRef(),
+        supplierAddress: useRef(),
+        button: useRef(),
+    };
+
+    // פונקציה שמעבירה לפוקוס הבא
+    const handleKeyDown = (e, nextField) => {
+        if (e.key === "Enter") {
+            e.preventDefault(); // מונע שליחה אוטומטית של טופס
+            refs[nextField]?.current?.focus();
+        }
+    };
+    const handleCloseSnackbar = () => {
+        setOpenSnackbar(false);
+        setFormDisabled(false);
+    };
+
     const [openSnackbar, setOpenSnackbar] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState("");
     const [snackbarSeverity, setSnackbarSeverity] = useState("success");
@@ -44,40 +97,46 @@ const SupplierUpdate = () => {
     const [phone, setPhone] = useState("");
     const [email, setEmail] = useState("");
     const [address, setAddress] = useState("");
-    const [contactName, setContactName] = useState("");
-    const [numCard, setNumCard] = useState("");
-
+    const [numCard, setNumCard] = useState(null);
 
     useEffect(() => {
         window.scrollTo(0, 0);
     }, []);
 
     useEffect(() => {
+        if (!numericId) return;
+
         if (!IsInsupplier1) {
             dispatch(fetchOneCustomer(numericId));
         } else {
             dispatch(fetchOneSupplier(numericId));
         }
     }, [dispatch, IsInsupplier1, numericId]);
+
     const currentCustomer = useSelector(state => state.Customers.currentCustomer);
     const currentSupplier = useSelector(state => state.Suppliers.currentSupplier);
     const newSupplier = IsInsupplier1 ? currentSupplier : currentCustomer;
-    useEffect(() => {
-        if (!newSupplier) return;
 
+    useEffect(() => {
+
+        if (!newSupplier) return;
         const nameFromStore = IsInsupplier1 ? newSupplier.providerName : newSupplier.customerName;
         const phoneFromStore = IsInsupplier1 ? newSupplier.providerPhoneNumber : newSupplier.customerPhoneNumber;
         const emailFromStore = IsInsupplier1 ? newSupplier.providerEmail : newSupplier.customerEmail;
         const addressFromStore = IsInsupplier1 ? newSupplier.providerAddress : newSupplier.customerAddress;
-        const contactNameFromStore = IsInsupplier1 ? newSupplier.providerContactName : newSupplier.customerContactName;
-        const numCardFromStore = IsInsupplier1 ? newSupplier.providerCompanyNumber : newSupplier.customerCardNumber;
+        const numCardFromStore = IsInsupplier1
+            ? newSupplier.providerCardNumber
+            : newSupplier.customerCardNumber;
 
+        const idFromStore = IsInsupplier1
+            ? newSupplier.providerId
+            : newSupplier.customerId;
+
+        setNumCard(numCardFromStore ? { label: numCardFromStore.toString(), value: idFromStore } : null);
         setName(nameFromStore || "");
         setPhone(phoneFromStore || "");
         setEmail(emailFromStore || "");
         setAddress(addressFromStore || "");
-        setContactName(contactNameFromStore || "");
-        setNumCard(numCardFromStore || "");
     }, [newSupplier, IsInsupplier1]);
 
     const updateSupplier1 = async (e) => {
@@ -91,8 +150,8 @@ const SupplierUpdate = () => {
                 ProviderPhoneNumber: phone,
                 ProviderAddress: address,
                 ProviderEmail: email,
-                ProviderContactName: contactName,
-                ProviderCardNumber: numCard
+                ProviderContactName: "",
+                ProviderCardNumber: numCard?.label || ""
             }
             try {
 
@@ -115,8 +174,8 @@ const SupplierUpdate = () => {
                 CustomerPhoneNumber: phone,
                 CustomerAddress: address,
                 CustomerEmail: email,
-                CustomerContactName: contactName,
-                CustomerCardNumber: numCard
+                CustomerContactName: "",
+                CustomerCardNumber: numCard?.label || ""
             }
             try {
                 await dispatch(updateCustomer({ id: numericId, CustomerData: updatedSupplier })).unwrap();
@@ -181,57 +240,79 @@ const SupplierUpdate = () => {
                 </Typography>
 
                 <form onSubmit={updateSupplier1} style={{ width: '100%' }}>
-                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                    <Box dir="rtl" sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
 
-                        <TextField label="מ'ס כרטיס" value={numCard}
-                            type="number" onChange={(e) => setSupplierNumCard(e.target.value)} fullWidth variant="outlined"
-                            disabled={formDisabled}
-                            sx={{ backgroundColor: '#F3BBB3' }} 
-                              InputLabelProps={{
-                               sx: {  color: 'black',fontSize: '1.4rem' }
-                            }}
-                            />
+                        <CardNumberButton
+                            selectedCard={numCard}
+                            setSelectedCard={()=> { }}
+                    sx={{ ...textFieldSx, pointerEvents: 'none' }}
+                            isSupplierCard={IsInsupplier1}
+                        />
+
 
                         <TextField label={IsInsupplier1 ? "שם ספק" : "שם לקוח"} value={name}
                             onChange={(e) => setName(e.target.value)} fullWidth variant="outlined"
-                            sx={{ backgroundColor: '#F3BBB3' }}
+
                             disabled={formDisabled}
-                            InputLabelProps={{
-                               sx: {  color: 'black',fontSize: '1.4rem' }
-                            }} />
+                            sx={textFieldSx}
+                            InputProps={{ sx: { direction: 'rtl', textAlign: 'right' } }}
+                            inputProps={inputProps}
+                            InputLabelProps={inputLabelProps}
+                            inputRef={refs.supplierName}
+                            onKeyDown={(e) => handleKeyDown(e, "supplierAddress")}
+                        />
 
 
                         <TextField label="כתובת" value={address}
                             onChange={(e) => setAddress(e.target.value)} fullWidth variant="outlined"
-                            sx={{ backgroundColor: '#F3BBB3' }}
                             disabled={formDisabled}
-                            InputLabelProps={{
-                               sx: {  color: 'black',fontSize: '1.4rem' }
-                            }} />
+                            sx={textFieldSx}
+                            InputProps={{ sx: { direction: 'rtl', textAlign: 'right' } }}
+                            inputProps={inputProps}
+                            InputLabelProps={inputLabelProps}
+                            inputRef={refs.supplierAddress}
+                            onKeyDown={(e) => handleKeyDown(e, "supplierPhone")}
+                        />
 
-                        <TextField label="טלפון" value={phone}
-                            type="tel" onChange={(e) => setPhone(e.target.value)} fullWidth variant="outlined"
-                            sx={{ backgroundColor: '#F3BBB3' }}
+                        <TextField
+                            label="טלפון"
+                            value={phone}
+                            onChange={(e) => setPhone(e.target.value)}
+                            fullWidth
+                            variant="outlined"
+                            sx={textFieldSx}
+                            InputProps={{ sx: { direction: 'rtl', textAlign: 'right' } }}
+                            inputProps={inputProps}
+                            InputLabelProps={inputLabelProps}
                             disabled={formDisabled}
-                            InputLabelProps={{
-                               sx: {  color: 'black',fontSize: '1.4rem' }
-                            }} />
+                            inputRef={refs.supplierPhone}
+                            onKeyDown={(e) => handleKeyDown(e, "supplierEmail")}
+                        />
+
+
 
                         <TextField label="מייל" value={email}
-                           onChange={(e) => setEmail(e.target.value)} fullWidth variant="outlined"
-                            sx={{ backgroundColor: '#F3BBB3' }}
+                            onChange={(e) => setEmail(e.target.value)} fullWidth variant="outlined"
                             disabled={formDisabled}
-                            InputLabelProps={{
-                               sx: {  color: 'black',fontSize: '1.4rem' }
-                            }} />
+                            sx={textFieldSx}
+                            InputProps={{ sx: { direction: 'rtl', textAlign: 'right' } }}
+                            inputProps={inputProps}
+                            InputLabelProps={inputLabelProps}
+                            inputRef={refs.supplierEmail}
+                            onKeyDown={(e) => handleKeyDown(e, "button")}
 
+                        />
+{/* 
                         <TextField label="שם איש קשר" value={contactName}
                             onChange={(e) => setContactName(e.target.value)} fullWidth variant="outlined"
-                            sx={{ backgroundColor: '#F3BBB3' }}
                             disabled={formDisabled}
-                            InputLabelProps={{
-                                sx: {  color: 'black',fontSize: '1.4rem' }
-                            }} />
+                            sx={textFieldSx}
+                            InputProps={{ sx: { direction: 'rtl', textAlign: 'right' } }}
+                            inputProps={inputProps}
+                            InputLabelProps={inputLabelProps}
+                            inputRef={refs.supplierContactName}
+                            onKeyDown={(e) => handleKeyDown(e, "button")}
+                        /> */}
 
                         <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                             <Button type="submit"
@@ -243,7 +324,9 @@ const SupplierUpdate = () => {
                                     fontSize: { xs: '14px', sm: '20px' },
                                     '&:hover': { backgroundColor: '#F7C6C2' },
                                     '&:active': { backgroundColor: '#F7C6C2' }
-                                }}>
+                                }}
+                                inputRef={refs.button}
+                            >
                                 עדכן
                             </Button>
                         </Box>

@@ -1,12 +1,12 @@
 import { createSlice } from "@reduxjs/toolkit";
 import {
-    fetchCustomerInvoices,
-    fetchOneCustomerInvoice,
-    addCustomerInvoice,
-    updateCustomerInvoice,
-    deleteCustomerInvoice,
-    deleteCustomerInvoices
-  } from "./customerInvoicesThunk";
+  fetchCustomerInvoices,
+  fetchOneCustomerInvoice,
+  addCustomerInvoice,
+  updateCustomerInvoice,
+  deleteCustomerInvoice,
+  deleteCustomerInvoices
+} from "./customerInvoicesThunk";
 
 const initialState = {
 
@@ -21,10 +21,10 @@ const customerInvoicesSlice = createSlice({
   name: "customerInvoices",
   initialState,
   reducers: {},
-  
+
   extraReducers: (builder) => {
     builder
-    .addCase(fetchCustomerInvoices.pending, (state) => {
+      .addCase(fetchCustomerInvoices.pending, (state) => {
         state.isLoading = true;
       })
       .addCase(fetchCustomerInvoices.fulfilled, (state, action) => {
@@ -54,11 +54,11 @@ const customerInvoicesSlice = createSlice({
         state.customerInvoicesList.push(action.payload);
         state.createdInvoice = action.payload;
       })
-       .addCase(addCustomerInvoice.rejected, (state) => {
+      .addCase(addCustomerInvoice.rejected, (state) => {
         state.isLoading = false;
         state.error = true;
       })
-       .addCase(addCustomerInvoice.pending, (state) => {
+      .addCase(addCustomerInvoice.pending, (state) => {
         state.isLoading = true;
         state.error = false;
       })
@@ -106,6 +106,22 @@ const customerInvoicesSlice = createSlice({
       //     (i) => i.CustomerInvoiceId !== action.payload
       //   );
       // });
+      .addCase(deleteCustomerInvoices.pending, (state) => {
+        state.isLoading = true;
+        state.error = false;
+      })
+      .addCase(deleteCustomerInvoices.fulfilled, (state, action) => {
+        state.isLoading = false;
+        // הסרת כל החשבוניות של אותו לקוח מה-state
+        state.customerInvoicesList = state.customerInvoicesList.filter(
+          (invoice) => invoice.CustomerId !== action.payload
+        );
+      })
+      .addCase(deleteCustomerInvoices.rejected, (state) => {
+        state.isLoading = false;
+        state.error = true;
+      })
+
   },
 });
 

@@ -1,6 +1,6 @@
 import { useSelector } from "react-redux";
 import SupplierNameButton from "./InvoiceAndPayment/SupplierNameButton";
-import YearButton from "./InvoiceAndPayment/YearButton";
+import DateButton from "./InvoiceAndPayment/DateButton";
 import { Box, Typography, Button } from "@mui/material";
 import { useState } from "react";
 
@@ -118,7 +118,7 @@ const InvoiceReport = () => {
                             borderRadius: '4px',
                             padding: '8px',
                         }}>
-                            <YearButton sx={{
+                            <DateButton sx={{
                                 '& .MuiInputBase-root': {
                                     backgroundColor: '#DA9F9A',
                                 }
@@ -138,7 +138,7 @@ const InvoiceReport = () => {
                             borderRadius: '4px',
                             padding: '8px',
                         }}>
-                            <YearButton sx={{
+                            <DateButton sx={{
                                 '& .MuiInputBase-root': {
                                     backgroundColor: '#DA9F9A',
                                 }

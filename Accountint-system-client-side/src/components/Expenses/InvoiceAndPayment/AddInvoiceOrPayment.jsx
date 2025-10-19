@@ -12,6 +12,10 @@ import { addCustomerInvoice } from "../../../redux/customerInvoicesThunk";
 import { addCard } from "../../../redux/CardThunk";
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
+import CardNumberButton from "./CardNumberButton";
+import { Grid } from "@mui/material";
+import { useRef } from "react";
+import { fetchCategories } from "../../../redux/CategoryThunk";
 
 
 const AddInvoiceOrPayment = () => {
@@ -24,24 +28,68 @@ const AddInvoiceOrPayment = () => {
   const today = new Date().toISOString().split('T')[0];
   let lastNameSupplier = "";
   let lastNameCustomer = "";
-  let classification ="";
+  let classification = "";
   const [reloadFromStorage, setReloadFromStorage] = useState(false);
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState("success");
-
+  const suppliers = useSelector(state => state.Suppliers.supplierDetailsList);
+  const customers = useSelector(state => state.Customers.customersDetailsList);
+  const allCategory = useSelector(state => state.category.categories);
+  const entitiesList = isInvoice ? customers : suppliers;
   const [formData, setFormData] = useState({
-
     supplier: null,
-    paymentMethod: "",
-    amount: 0,
+    numCardSupplier: null,
+    amount: "",
     date: today,
     paymentDate: today,
     details: "",
     reference: "",
-    ExpenseClassification: "",
-
+    ExpenseClassification: null,
   });
+
+  const refs = {
+    supplier: useRef(),
+    cardNumber: useRef(),
+    expenseClassification: useRef(),
+    amount: useRef(),
+    date: useRef(),
+    paymentDate: useRef(),
+    details: useRef(),
+    reference: useRef(),
+    button: useRef()
+  };
+  const handleKeyDown = (e, nextField) => {
+    if (e.key === "Enter") {
+      e.preventDefault(); // מונע שליחה אוטומטית של טופס
+      refs[nextField]?.current?.focus();
+    }
+  };
+  const handleEntityChange = (entityId) => {
+    const entity = entitiesList.find(e =>
+      (!isInvoice ? e.providerId : e.customerId) === entityId
+    );
+    if (!entity) return;
+
+    const supplierOption = {
+      label: !isInvoice ? entity.providerName : entity.customerName,
+      value: !isInvoice ? entity.providerId : entity.customerId
+    };
+
+    const cardOption = {
+      label: (!isInvoice ? entity.providerCardNumber : entity.customerCardNumber)?.toString(),
+      value: !isInvoice ? entity.providerId : entity.customerId
+    };
+
+    setFormData((prev) => ({
+      ...prev,
+      supplier: supplierOption,
+      numCardSupplier: cardOption
+    }));
+  };
+
+
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -54,16 +102,14 @@ const AddInvoiceOrPayment = () => {
   const resetForm = () => {
     setFormData((prev) => ({
       ...prev,
-      amount: 0,
+      amount: "",
       date: today,
       paymentDate: today,
       details: "",
       reference: "",
-      ExpenseClassification: "",
       paymentMethod: "",
     }));
   };
-
 
   const showSnackbar = (message) => {
     setSnackbarMessage(message);
@@ -71,8 +117,7 @@ const AddInvoiceOrPayment = () => {
   };
 
   const handleSubmit = async () => {
-
-    if (!formData.supplier) {
+    if (!formData.supplier && !formData.numCardSupplier) {
       setSnackbarSeverity("error");
       isInvoice ? showSnackbar("נא למלא שם לקוח") : showSnackbar("נא למלא שם ספק");
       return;
@@ -82,7 +127,12 @@ const AddInvoiceOrPayment = () => {
       isInvoice ? showSnackbar("נא למלא סיווג הכנסה") : showSnackbar("נא למלא סיווג הוצאה");
       return;
     }
-    
+
+    if (!formData.amount || formData.amount <= 0) {
+      showSnackbar("נא למלא סכום תקין");
+      setSnackbarSeverity("error");
+      return;
+    }
     const isCard = cards.find(card => card.cardName === formData.supplier.label && card.categoryId === formData.ExpenseClassification);
     let cardId = 0;
     if (!isCard) {
@@ -102,9 +152,10 @@ const AddInvoiceOrPayment = () => {
           }
         }
       )).unwrap();
-      cardId = addedCard.CardId;
+      cardId = addedCard.cardId;
     }
     else {
+      console.log("כרטיס קיים", isCard.cardId);
       cardId = isCard.cardId;
     }
 
@@ -176,26 +227,26 @@ const AddInvoiceOrPayment = () => {
         }
       }
     };
-
     const invoiceData = !isInvoice ? providerInvoice : customerInvoice;
     try {
       if (!isInvoice) {
-        
         lastNameSupplier = formData.supplier;
-        classification=formData.ExpenseClassification;
+        classification = formData.ExpenseClassification;
         localStorage.setItem("lastNameSupplier", JSON.stringify(lastNameSupplier));
-        localStorage.setItem("classification", JSON.stringify(classification));
+        localStorage.setItem("classificationSupplier", JSON.stringify(classification));
+        localStorage.setItem("lastCardSupplier", JSON.stringify(formData.numCardSupplier));
         await dispatch(addProviderInvoice(invoiceData)).unwrap();
         setSnackbarSeverity("success");
         showSnackbar("התשלום נוסף בהצלחה");
       }
       else {
-       
         lastNameCustomer = formData.supplier;
-        classification=formData.ExpenseClassification;
+        classification = formData.ExpenseClassification;
         localStorage.setItem("lastNameCustomer", JSON.stringify(lastNameCustomer));
-        localStorage.setItem("classification", JSON.stringify(classification));
+        localStorage.setItem("classificationCustomer", JSON.stringify(classification));
+        localStorage.setItem("lastCardSupplier", JSON.stringify(formData.numCardSupplier));
         await dispatch(addCustomerInvoice(invoiceData)).unwrap();
+        console.log("תאריך פרעון לאחר יצוירת חשבויות", invoiceData.customerInvoiceMaturityDate, invoiceData.customerInvoiceDate);
         setSnackbarSeverity("success");
         showSnackbar("החשבונית נוספה בהצלחה");
       }
@@ -203,7 +254,7 @@ const AddInvoiceOrPayment = () => {
       setReloadFromStorage(prev => !prev);
     }
     catch (error) {
-      console.error("שגיאה בהוספת חשבונית:", error);
+      console.log("Validation Errors:", error?.response?.data);
       setSnackbarSeverity("error");
       showSnackbar("שגיאה בהוספת חשבונית, אנא נסה שוב.");
       if (error?.errors) {
@@ -214,31 +265,50 @@ const AddInvoiceOrPayment = () => {
 
   useEffect(() => {
     dispatch(fetchCards());
+    dispatch(fetchCategories()).then((res) => {
+      if (res?.payload) {
+        localStorage.setItem("allCategories", JSON.stringify(res.payload));
+      }
+    });
   }, [dispatch]);
 
+  // 2. טען ברירת מחדל מה-localStorage
   useEffect(() => {
     const savedSupplier = localStorage.getItem("lastNameSupplier");
     const savedCustomer = localStorage.getItem("lastNameCustomer");
-    const savedClassification = localStorage.getItem("classification");
+    const savedCard = localStorage.getItem("lastCardSupplier");
+
+    // הבחירה האחרונה של סיווג לפי מצב (ספק/לקוח)
+    const savedKey = isInvoice ? "classificationCustomer" : "classificationSupplier";
+    const savedClassification = localStorage.getItem(savedKey);
 
     if (!isInvoice && savedSupplier) {
       setFormData((prev) => ({
         ...prev,
-        supplier: JSON.parse(savedSupplier)
+        supplier: JSON.parse(savedSupplier),
+        numCardSupplier: savedCard ? JSON.parse(savedCard) : null,
       }));
     }
 
     if (isInvoice && savedCustomer) {
       setFormData((prev) => ({
         ...prev,
-        supplier: JSON.parse(savedCustomer)
+        supplier: JSON.parse(savedCustomer),
+        numCardSupplier: savedCard ? JSON.parse(savedCard) : null,
       }));
     }
-    setFormData((prev) => ({
+
+    // בדוק שהסיווג באמת קיים בקטגוריות
+    if (savedClassification) {
+      const parsed = JSON.parse(savedClassification);
+      const validCategory = allCategory.find(c => c.categoryId === parsed);
+
+      setFormData((prev) => ({
         ...prev,
-        ExpenseClassification: JSON.parse(savedClassification)
+        ExpenseClassification: validCategory ? parsed : ""
       }));
-  }, [isInvoice,reloadFromStorage]);
+    }
+  }, [isInvoice, allCategory, reloadFromStorage]);
 
 
   if (isLoading) {
@@ -287,200 +357,216 @@ const AddInvoiceOrPayment = () => {
   };
 
   return (
-    <Box sx={{
-      display: 'flex',
-      justifyContent: 'center',
-      width: '100%',
-      marginTop: '1.25rem', 
-    }}>
-      <Box sx={{
-        width: '70%',
-        padding: '1.25rem', // ≈ 20px
-        backgroundColor: '#F3BBB3',
-        marginBottom: '1.25rem',
-        borderRadius: '0.5rem',
-        boxShadow: '0 0.25rem 0.5rem rgba(0, 0, 0, 0.1)',
-        border: '2px solid #D19793'
-      }}>
-        <Typography variant="h5" sx={{
-          color: 'black',
-          fontWeight: 'bold',
-          marginBottom: '2rem',
-          textAlign: 'center',
-          fontSize: '1.5rem' // ≈ 24px
-        }}>
-          פרטי {isInvoice ? "חשבונית" : "תשלום"}
+    <Box
+      sx={{
+        display: 'flex',
+        justifyContent: 'center',
+        width: '100%',
+        marginTop: '1.25rem',
+      }}
+    >
+      <Box
+        sx={{
+          width: '90%',
+          padding: '1.25rem',
+          backgroundColor: '#F3BBB3',
+          marginBottom: '1.25rem',
+          borderRadius: '0.5rem',
+          boxShadow: '0 0.25rem 0.5rem rgba(0, 0, 0, 0.1)',
+          border: '2px solid #D19793',
+        }}
+      >
+        <Typography
+          variant="h5"
+          sx={{
+            color: 'black',
+            fontWeight: 'bold',
+            marginBottom: '2rem',
+            textAlign: 'center',
+            fontSize: '1.5rem',
+          }}
+        >
+          פרטי {isInvoice ? 'חשבונית' : 'תשלום'}
         </Typography>
 
-        <SupplierNameButton
-          sx={textFieldStyles}
-          selectedName={formData.supplier}
-          setSelectedName={(supplier) =>
-            setFormData((prev) => ({ ...prev, supplier }))
-          }
-        />
-
-        <ExpenseClassificationButton
-          selectedCategory={formData.ExpenseClassification}
-          setSelectedCategory={(ExpenseClassification) =>
-            setFormData((prev) => ({ ...prev, ExpenseClassification }))
-          }
-        />
-        {isInvoice && <PaymentMethodButton />}
-
-        <Box sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '1rem'
-        }}>
-
-          <Typography 
-          variant="h6"
-            sx={{
-              textAlign: 'right',
-              color: 'black',
-              fontSize: '1.125rem'
-            }}
-          >סכום
-          </Typography>
-
-          <TextField fullWidth 
-            type="number"
-            variant="outlined"
-            sx={textFieldStyles}
-            onChange={handleChange}
-            value={formData.amount}
-            name="amount"
-          />
-
-          <Typography
-            variant="h6"
-            sx={{
-              textAlign: 'right',
-              color: 'black',
-              fontSize: '1.125rem'
-            }}
-          >
-            תאריך
-          </Typography>
-
-          <TextField fullWidth
-            type="date"
-            variant="outlined"
-            sx={textFieldStyles}
-            onChange={handleChange}
-            value={formData.date}
-            name="date"
-          />
-
-
-          {isInvoice ? (
-            <Box>
-              <Typography variant="h6"
-                sx={{
-                  textAlign: 'right',
-                  color: 'black',
-                  fontSize: '1.125rem'
-                }}>
-                תאריך פרעון
-              </Typography>
-              <TextField fullWidth
-                type="date"
-                variant="outlined"
-                sx={textFieldStyles}
-                onChange={handleChange}
-                value={formData.paymentDate}
-                name="paymentDate"
-              />
-            </Box>
-          ) : (
-            <Box>
-              <Typography variant="h6"
-                sx={{
-                  textAlign: 'right',
-                  color: 'black',
-                  fontSize: '1.125rem'
-                }}>
-                תאריך לתשלום
-              </Typography>
-              <TextField fullWidth
-                type="date"
-                variant="outlined"
-                sx={textFieldStyles}
-                onChange={handleChange}
-                value={formData.paymentDate}
-                name="paymentDate"
-              />
-            </Box>
-          )}
-
-          {/* פרטים */}
-          <Typography variant="h6"
-            sx={{
-              textAlign: 'right',
-              color: 'black',
-              fontSize: '1.125rem'
-            }}>
-            פרטים
-          </Typography>
-          <TextField fullWidth
-            variant="outlined"
-            sx={textFieldStyles}
-            onChange={handleChange}
-            value={formData.details}
-            name="details"
-          />
-          <Typography
-            variant="h6"
-            sx={{
-              textAlign: 'right',
-              color: 'black',
-              fontSize: '1.125rem'
-            }}>
-            אסמכתא
-          </Typography>
-          <TextField fullWidth
-            variant="outlined"
-            sx={textFieldStyles}
-            onChange={handleChange}
-            value={formData.reference}
-            name="reference"
-          />
-          <Box
-            sx={{
-              display: 'flex',
-              justifyContent: 'center'
-            }}>
-            <Button
-              variant="contained"
-              color="primary"
-              sx={{
-                width: '40%',
-                backgroundColor: '#F8D5D1',
-                color: '#000',
-                fontSize: '1rem',
-                '&:hover': { backgroundColor: '#F7C6C2' }
-              }}
-              onClick={handleSubmit}
-
+        <Grid container spacing={2} sx={{ marginBottom: '1rem' }}>
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+            <Typography
+              sx={{ textAlign: 'right', color: 'black', fontSize: '1.2rem', marginBottom: 1 }}
             >
-              הוסף
-            </Button>
-          </Box>
-        </Box>
+              סכום
+            </Typography>
+            <TextField
+              fullWidth
+              type="number"
+              variant="outlined"
+              sx={textFieldStyles}
+              onChange={handleChange}
+              value={formData.amount}
+              name="amount"
+              inputRef={refs.amount}
+              onKeyDown={(e) => handleKeyDown(e, "reference")}
+            />
+          </Grid>
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+            <ExpenseClassificationButton
+              selectedCategory={formData.ExpenseClassification}
+              setSelectedCategory={(ExpenseClassification) =>
+                setFormData((prev) => ({ ...prev, ExpenseClassification }))
+              }
+              sx={textFieldStyles}
+              isSupplierCard={false}
+              inputRef={refs.expenseClassification}
+              onKeyDown={(e) => handleKeyDown(e, "amount")}
+            />
+          </Grid>
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+            <SupplierNameButton
+              sx={textFieldStyles}
+              selectedName={formData.supplier}
+              setSelectedName={(supplier) => {
+                if (supplier) {
+                  handleEntityChange(supplier.value);
+                } else {
+                  setFormData((prev) => ({
+                    ...prev,
+                    supplier: null,
+                    numCardSupplier: null,
+                  }));
+                }
+              }}
+              inputRef={refs.supplier}
+              onKeyDown={(e) => handleKeyDown(e, "numCard")}
+            />
+          </Grid>
+
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+            <CardNumberButton
+              sx={textFieldStyles}
+              selectedCard={formData.numCardSupplier}
+              setSelectedCard={(card) => {
+                if (card) {
+                  handleEntityChange(card.value);
+                } else {
+                  setFormData((prev) => ({
+                    ...prev,
+                    supplier: null,
+                    numCardSupplier: null,
+                  }));
+                }
+              }}
+              isSupplierCard={false}
+              inputRef={refs.numCard}
+              onKeyDown={(e) => handleKeyDown(e, "expenseClassification")}
+            />
+          </Grid>
+
+        </Grid>
+        <Grid container spacing={2}>
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+            <Typography sx={{ textAlign: 'right', color: 'black', fontSize: '1.2rem', marginBottom: 1 }}>
+              תאריך
+            </Typography>
+            <TextField
+              fullWidth
+              type="date"
+              variant="outlined"
+              sx={textFieldStyles}
+              onChange={handleChange}
+              value={formData.date}
+              name="date"
+              inputRef={refs.date}
+              onKeyDown={(e) => handleKeyDown(e, "amount")}
+            />
+          </Grid>
+
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+            <Typography sx={{ textAlign: 'right', color: 'black', fontSize: '1.2rem', marginBottom: 1 }}>
+              {isInvoice ? 'תאריך פרעון' : 'תאריך לתשלום'}
+            </Typography>
+            <TextField
+              fullWidth
+              type="date"
+              variant="outlined"
+              sx={textFieldStyles}
+              onChange={handleChange}
+              value={formData.paymentDate}
+              name="paymentDate"
+              inputRef={refs.paymentDate}
+              onKeyDown={(e) => handleKeyDown(e, "date")}
+            />
+          </Grid>
+
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+            <Typography sx={{ textAlign: 'right', color: 'black', fontSize: '1.2rem', marginBottom: 1 }}>
+              פרטים
+            </Typography>
+            <TextField
+              fullWidth
+              variant="outlined"
+              sx={textFieldStyles}
+              onChange={handleChange}
+              value={formData.details}
+              name="details"
+              inputRef={refs.details}
+              onKeyDown={(e) => handleKeyDown(e, "paymentDate")}
+            />
+          </Grid>
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+            <Typography sx={{ textAlign: 'right', color: 'black', fontSize: '1.2rem', marginBottom: 1 }}>
+              אסמכתא
+            </Typography>
+            <TextField
+              fullWidth
+              variant="outlined"
+              sx={textFieldStyles}
+              onChange={handleChange}
+              value={formData.reference}
+              name="reference"
+              inputRef={refs.reference}
+              onKeyDown={(e) => handleKeyDown(e, "details")}
+            />
+          </Grid>
+        </Grid>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}
+          sx={{ display: 'flex', justifyContent: 'center' }}>
+          <Button
+            variant="contained"
+            sx={{
+              height: '56px',
+              width: '200px',
+              backgroundColor: '#F8D5D1',
+              borderRadius: '30px',
+              color: '#000',
+              fontSize: '1.3rem',
+              '&:hover': { backgroundColor: '#F7C6C2' },
+              marginTop: '1.35rem',
+            }}
+            onClick={handleSubmit}
+          >
+            הוסף
+          </Button>
+        </Grid>
+
+
         <Snackbar
           open={openSnackbar}
           autoHideDuration={3000}
           onClose={() => setOpenSnackbar(false)}
-          anchorOrigin={{ vertical: "top", horizontal: "center" }}
+          anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
         >
-          <MuiAlert onClose={() => setOpenSnackbar(false)} severity={snackbarSeverity} sx={{ width: '100%' }}>
+          <MuiAlert
+            onClose={() => setOpenSnackbar(false)}
+            severity={snackbarSeverity}
+            sx={{ width: '100%' }}
+          >
             {snackbarMessage}
           </MuiAlert>
         </Snackbar>
       </Box>
     </Box>
   );
+
 };
 
 

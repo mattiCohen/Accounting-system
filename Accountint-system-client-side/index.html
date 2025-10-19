@@ -16,16 +16,33 @@
     color: black !important;
     line-height: 1.2 !important;
   }
+  /* הסר גלילה מכל התיבות */
+  .printable {
+    overflow: visible !important; /* מראה את כל התוכן */
+    height: auto !important;       /* גובה אוטומטי לכל השורות */
+  }
+table, th, td {
+    border: 1px solid black !important;
+  }
+  th, td {
+    border-collapse: collapse !important;
+  }
+  /* הסתר כפתורים וממשק שאינו להדפסה */
+  .no-print {
+    display: none !important;
+  }
+
+  .MuiTableContainer-root {
+    max-height: none !important;
+    overflow: visible !important;
+  }
 
   body, html {
     margin: 0 !important;
     padding: 0 !important;
     font-size: 10pt !important;
     direction: rtl;
-  }
 
-  .no-print {
-    display: none !important;
   }
 
   .invoice-card {
@@ -64,6 +81,18 @@
     font-weight: bold !important;
     font-size: 14pt !important;
     margin-top: 1rem !important;
+  }
+  .logo {
+    width: "50px"!important;   /* smaller width */
+    max-width: "50px" !important;
+    height: auto !important;   /* maintain aspect ratio */
+    filter: grayscale(100%) brightness(0) !important; /* makes it black */
+  }
+  .print-all-rows {
+    display: table-row-group !important;
+  }
+  .no-print {
+    display: none !important;
   }
 }
 

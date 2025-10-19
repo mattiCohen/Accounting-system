@@ -2,14 +2,16 @@ import { Box, Button } from '@mui/material';
 import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { NavLink } from 'react-router-dom';
-import { setIsInSupliers } from '../redux/SuppliersSlice';
+import { fetchIsInSuppliers, setIsInSuppliersOnServer } from '../redux/suppliersThunk';
+
 
 const HomePage = () => {
   const dispatch = useDispatch();
 
-  const handleActive = (s) => {
-    dispatch(setIsInSupliers(s));
-  };
+ const handleActive = async(value) => {
+  await dispatch(setIsInSuppliersOnServer(value)).unwrap();
+  await dispatch(fetchIsInSuppliers()).unwrap();
+};
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -23,7 +25,7 @@ const HomePage = () => {
         justifyContent: 'flex-start',
         alignItems: 'center',
         minHeight: '100vh',
-        backgroundColor: '#2e3166',
+        backgroundColor: '#242650ff',
         padding: 2,
         paddingTop: '20vh',
       }}
@@ -36,14 +38,15 @@ const HomePage = () => {
           flexWrap: 'wrap', 
         }}
       >
-        <NavLink to="/Expenses" style={{ textDecoration: 'none' }} onClick={() => handleActive(true)}>
+        <NavLink to="/Expenses" 
+        style={{ textDecoration: 'none' }} 
+        onClick={() => handleActive(true)}>
           <Button
             variant="contained"
             sx={{
               backgroundColor: '#F3BBB3',
               color: 'black',
               fontSize: { xs: '1rem', sm: '1.25rem', md: '1.5rem' },
-              fontWeight: 'bold',
               borderRadius: '35px',
               width: { xs: '200px', sm: '220px', md: '230px' },
               height: { xs: '50px', sm: '55px', md: '60px' },
@@ -63,7 +66,6 @@ const HomePage = () => {
               backgroundColor: '#F3BBB3',
               color: 'black',
               fontSize: { xs: '1rem', sm: '1.25rem', md: '1.5rem' },
-              fontWeight: 'bold',
               borderRadius: '35px',
               width: { xs: '200px', sm: '220px', md: '230px' },
               height: { xs: '50px', sm: '55px', md: '60px' },

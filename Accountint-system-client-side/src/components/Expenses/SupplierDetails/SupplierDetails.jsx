@@ -22,9 +22,9 @@ const SupplierDetails = () => {
   const ListOfDetails = useSelector(state => IsInSupliers ? state.Suppliers.supplierDetailsList : state.Customers.customersDetailsList)
   const { error, isLoading } = useSelector(state => IsInSupliers ? state.Suppliers : state.Customers)
   const [selectedRow, setSelectedRow] = useState(null);
-  const [page, setPage] = React.useState(0);
-  const [rowsPerPage, setRowsPerPage] = React.useState(10);
-
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+  
   const handleRowClick = (id) => {
     setSelectedRow(id === selectedRow ? null : id);
   };
@@ -49,11 +49,12 @@ const SupplierDetails = () => {
       }
     }
   };
+
   useEffect(() => {
     if (IsInSupliers)
       dispatch(fetchSuppliers());  // שולחת את הבקשה ברגע שהקומפוננטה נטענת
     else dispatch(fetchCustomers());
-  }, [dispatch]);
+  }, [dispatch,IsInSupliers]);
 
   if (isLoading) {
       return (
@@ -64,7 +65,6 @@ const SupplierDetails = () => {
             <CircularProgress style={{ color: "black" }} />
           </div>
       );
-  
     }
 
    if (error) {
@@ -121,7 +121,6 @@ const SupplierDetails = () => {
         numCard: supplierData.customerCardNumber,
       };
       
-
     }
   }
 
@@ -182,7 +181,7 @@ const SupplierDetails = () => {
   function ReactTable() {
     return (
       <Paper sx={{ width: '100%', overflow: 'auto', borderRadius: '22px' }}>
-        <TableContainer sx={{ maxHeight: 440 }}>
+        <TableContainer >
           <Table
             stickyHeader
             aria-label="sticky table"

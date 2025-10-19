@@ -23,7 +23,6 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import SaveIcon from "@mui/icons-material/Save";
 import CancelIcon from "@mui/icons-material/Cancel";
-import { color } from "framer-motion";
 
 const SettingsPage = () => {
     const dispatch = useDispatch();
@@ -58,6 +57,9 @@ const SettingsPage = () => {
     };
 
     const handleDelete = async (id) => {
+        const confirmDelete = window.confirm("האם אתה בטוח שברצונך למחוק את הקטגוריה?");
+    if (!confirmDelete) return;
+    
         await dispatch(deleteCategory(id)).unwrap();
         await dispatch(fetchCategories()).unwrap();
     };
@@ -109,12 +111,11 @@ const SettingsPage = () => {
             );
 
     return (
-        <Box sx={{ padding: 4, textAlign: "center", backgroundColor: '#F3BBB3', }}>
+        <Box sx={{ padding: 4, textAlign: "center", backgroundColor: '#F3BBB3',borderRadius: '8px' }}>
             <Typography variant="h4" sx={{ mb: 3 }}>
                 ניהול קטגוריות
             </Typography>
 
-            {/* טופס הוספה */}
             <Box
                 display="flex"
                 justifyContent="center"

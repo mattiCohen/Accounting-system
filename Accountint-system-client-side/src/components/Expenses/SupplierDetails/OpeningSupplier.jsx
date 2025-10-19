@@ -8,6 +8,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
+import { useRef } from "react";
 
 
 const OpeningSupplier = () => {
@@ -24,11 +25,67 @@ const OpeningSupplier = () => {
     const [snackbarMessage, setSnackbarMessage] = useState("");
     const [snackbarSeverity, setSnackbarSeverity] = useState("success");
     const [formDisabled, setFormDisabled] = useState(false);
+    const refs = {
+        supplierName: useRef(),
+        supplierPhone: useRef(),
+        supplierEmail: useRef(),
+        supplierNumCard: useRef(),
+        supplierAddress: useRef(),
+        // supplierContactName: useRef(),
+        button: useRef(),
+    };
 
-const handleCloseSnackbar = () => {
-    setOpenSnackbar(false);
-    setFormDisabled(false); 
-};
+    // פונקציה שמעבירה לפוקוס הבא
+    const handleKeyDown = (e, nextField) => {
+        if (e.key === "Enter") {
+            e.preventDefault(); // מונע שליחה אוטומטית של טופס
+            refs[nextField]?.current?.focus();
+        }
+    };
+    const textFieldSx = {
+        backgroundColor: '#F3BBB3',
+        direction: 'rtl',
+        '& .MuiOutlinedInput-root': {
+            direction: 'rtl',
+            '& input': {
+                textAlign: 'right',
+            },
+            '& .MuiOutlinedInput-notchedOutline legend': {
+                textAlign: 'right',
+            },
+            '&.Mui-focused fieldset': {
+                borderColor: '#fff',
+            },
+        },
+    };
+
+    const inputProps = {
+        style: {
+            textAlign: 'right',
+            direction: 'rtl',
+        },
+    };
+
+    const inputLabelProps = {
+        shrink: true,
+        sx: {
+            direction: 'rtl',
+            transformOrigin: 'top right',
+            right: '2.2rem',
+            left: 'unset',
+            color: 'black',
+            fontSize: '1.6rem',
+            '&.Mui-focused': {
+                color: '#fff',
+                fontSize: { xs: '21px', sm: '25px' },
+            },
+        },
+    };
+
+    const handleCloseSnackbar = () => {
+        setOpenSnackbar(false);
+        setFormDisabled(false);
+    };
 
     const showSnackbar = (message) => {
         setSnackbarMessage(message);
@@ -39,48 +96,47 @@ const handleCloseSnackbar = () => {
     const [supplierName, setSupplierName] = useState("");
     const [supplierPhone, setSupplierPhone] = useState("");
     const [supplierEmail, setSupplierEmail] = useState("");
-    const [supplierNumCard, setSupplierNumCard] = useState("");
     const [supplierAddress, setSupplierAddress] = useState("");
     const [supplierContactName, setSupplierContactName] = useState("");
-   
+
     const openSupplier = async (e) => {
         e.preventDefault();
 
         const newSupplier = isSupplier ? {
-            
+
             providerName: supplierName.toString(),
             providerPhoneNumber: supplierPhone.toString(),
             providerAddress: supplierAddress.toString(),
             providerEmail: supplierEmail.toString(),
             providerContactName: supplierContactName.toString(),
-            providerCardNumber: supplierNumCard
+            providerCardNumber: 0
         } : {
-            
+
             customerName: supplierName.toString(),
             customerPhoneNumber: supplierPhone.toString(),
             customerAddress: supplierAddress.toString(),
             customerEmail: supplierEmail.toString(),
             customerContactName: supplierContactName.toString(),
-            customerCardNumber: supplierNumCard
+            customerCardNumber: 0
         };
-        
+
         if (
-            !supplierName ||
-            !supplierNumCard 
+            !supplierName
+
         ) {
             console.log("שדות ריקים, לא ניתן להוסיף");
             setSnackbarSeverity("error");
             showSnackbar("שדות ריקים, לא ניתן להוסיף");
             return;
         }
-        
+
         try {
             if (isSupplier) {
-                
+
                 await dispatch(addSupplier(newSupplier)).unwrap();
                 await dispatch(fetchSuppliers()).unwrap();
             } else {
-                
+
                 await dispatch(addCustomer(newSupplier)).unwrap();
                 await dispatch(fetchCustomers()).unwrap();
             }
@@ -89,15 +145,14 @@ const handleCloseSnackbar = () => {
             setSupplierName("");
             setSupplierPhone("");
             setSupplierEmail("");
-            setSupplierNumCard("");
             setSupplierAddress("");
             setSupplierContactName("");
 
             // navigate(isSupplier ? "/Expenses/SupplierDetails" : "/InCome/CustomerDetails");
 
-setTimeout(() => {
-    navigate(isSupplier ? "/Expenses/SupplierDetails" : "/InCome/CustomerDetails");
-}, 1000);
+            setTimeout(() => {
+                navigate(isSupplier ? "/Expenses/SupplierDetails" : "/InCome/CustomerDetails");
+            }, 1000);
 
 
         } catch (error) {
@@ -149,27 +204,33 @@ setTimeout(() => {
                 </Typography>
 
                 <form onSubmit={openSupplier} style={{ width: '100%', maxWidth: '600px' }}>
-                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-                        <TextField
+                    <Box dir="rtl" sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                         {/* <TextField
                             label="מ'ס כרטיס"
                             value={supplierNumCard}
-                            type="number"
-                            onChange={e => setSupplierNumCard(e.target.value)}
+                            readOnly
+                            // onChange={e => setSupplierNumCard(e.target.value)}
                             fullWidth
                             variant="outlined"
-                            sx={{ backgroundColor: '#F3BBB3' }}
                             disabled={formDisabled}
-                            InputLabelProps={{ sx: { fontSize: { xs: '16px', sm: '20px' } } }}
-                        />
+                           sx={textFieldSx}
+                            InputProps={{ sx: { direction: 'rtl', textAlign: 'right' } }}
+                            inputProps={inputProps}
+                            InputLabelProps={inputLabelProps}
+                        />  */}
                         <TextField
-                            label="שם ספק"
+                            label= {isSupplier ? "שם ספק" : "שם לקוח"} 
                             value={supplierName}
                             onChange={e => setSupplierName(e.target.value)}
                             fullWidth
                             variant="outlined"
-                            sx={{ backgroundColor: '#F3BBB3' }}
                             disabled={formDisabled}
-                            InputLabelProps={{ sx: { fontSize: { xs: '16px', sm: '20px' } } }}
+                            sx={textFieldSx}
+                            InputProps={{ sx: { direction: 'rtl', textAlign: 'right' } }}
+                            inputProps={inputProps}
+                            InputLabelProps={inputLabelProps}
+                            inputRef={refs.supplierName}
+                            onKeyDown={(e) => handleKeyDown(e, "supplierAddress")}
                         />
                         <TextField
                             label="כתובת"
@@ -177,9 +238,13 @@ setTimeout(() => {
                             onChange={e => setSupplierAddress(e.target.value)}
                             fullWidth
                             variant="outlined"
-                            sx={{ backgroundColor: '#F3BBB3' }}
                             disabled={formDisabled}
-                            InputLabelProps={{ sx: { fontSize: { xs: '16px', sm: '20px' } } }}
+                            sx={textFieldSx}
+                            InputProps={{ sx: { direction: 'rtl', textAlign: 'right' } }}
+                            inputProps={inputProps}
+                            InputLabelProps={inputLabelProps}
+                            inputRef={refs.supplierAddress}
+                            onKeyDown={(e) => handleKeyDown(e, "supplierPhone")}
                         />
                         <TextField
                             label="טלפון"
@@ -188,9 +253,13 @@ setTimeout(() => {
                             onChange={e => setSupplierPhone(e.target.value)}
                             fullWidth
                             variant="outlined"
-                            sx={{ backgroundColor: '#F3BBB3' }}
                             disabled={formDisabled}
-                            InputLabelProps={{ sx: { fontSize: { xs: '16px', sm: '20px' } } }}
+                            sx={textFieldSx}
+                            InputProps={{ sx: { direction: 'rtl', textAlign: 'right' } }}
+                            inputProps={inputProps}
+                            InputLabelProps={inputLabelProps}
+                            inputRef={refs.supplierPhone}
+                            onKeyDown={(e) => handleKeyDown(e, "supplierEmail")}
                         />
                         <TextField
                             label="מייל"
@@ -198,20 +267,28 @@ setTimeout(() => {
                             onChange={e => setSupplierEmail(e.target.value)}
                             fullWidth
                             variant="outlined"
-                            sx={{ backgroundColor: '#F3BBB3' }}
                             disabled={formDisabled}
-                            InputLabelProps={{ sx: { fontSize: { xs: '16px', sm: '20px' } } }}
+                            sx={textFieldSx}
+                            InputProps={{ sx: { direction: 'rtl', textAlign: 'right' } }}
+                            inputProps={inputProps}
+                            InputLabelProps={inputLabelProps}
+                            inputRef={refs.supplierEmail}
+                            onKeyDown={(e) => handleKeyDown(e, "button")}
                         />
-                        <TextField
+                        {/* <TextField
                             label="שם איש קשר"
                             value={supplierContactName}
                             onChange={e => setSupplierContactName(e.target.value)}
                             fullWidth
                             variant="outlined"
-                            sx={{ backgroundColor: '#F3BBB3' }}
                             disabled={formDisabled}
-                            InputLabelProps={{ sx: { fontSize: { xs: '16px', sm: '20px' } } }}
-                        />
+                            sx={textFieldSx}
+                            InputProps={{ sx: { direction: 'rtl', textAlign: 'right' } }}
+                            inputProps={inputProps}
+                            InputLabelProps={inputLabelProps}
+                            inputRef={refs.supplierContactName}
+                            onKeyDown={(e) => handleKeyDown(e, "button")}
+                        /> */}
                         <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                             <Button
                                 type="submit"
@@ -225,26 +302,23 @@ setTimeout(() => {
                                     '&:hover': { backgroundColor: '#F7C6C2' },
                                     '&:active': { backgroundColor: '#F7C6C2' }
                                 }}
+                                inputref={refs.button}
                             >
                                 הוסף
                             </Button>
                         </Box>
                     </Box>
                 </form>
-
-                
-         <Snackbar
-    open={openSnackbar}
-    autoHideDuration={3000}
-    onClose={handleCloseSnackbar}
-    anchorOrigin={{ vertical: "top", horizontal: "center" }}
->
-    <MuiAlert onClose={handleCloseSnackbar} severity={snackbarSeverity} sx={{ width: '100%' }}>
-        {snackbarMessage}
-    </MuiAlert>
-</Snackbar>
-
-
+                <Snackbar
+                    open={openSnackbar}
+                    autoHideDuration={3000}
+                    onClose={handleCloseSnackbar}
+                    anchorOrigin={{ vertical: "top", horizontal: "center" }}
+                >
+                    <MuiAlert onClose={handleCloseSnackbar} severity={snackbarSeverity} sx={{ width: '100%' }}>
+                        {snackbarMessage}
+                    </MuiAlert>
+                </Snackbar>
             </div>
         </div>
     );

@@ -1,12 +1,13 @@
 import { createSlice } from "@reduxjs/toolkit";
 import {
-    fetchProviderInvoices,
-    fetchOneProviderInvoice,
-    addProviderInvoice,
-    updateProviderInvoice,
-    deleteProviderInvoice,
-    deleteProviderInvoices
-  } from "./providerInvoicesThunk";
+  fetchProviderInvoices,
+  fetchOneProviderInvoice,
+  addProviderInvoice,
+  updateProviderInvoice,
+  deleteProviderInvoice,
+  deleteProvidersInvoicesByDateRange,
+  deleteProviderInvoicesByDateRange,
+} from "./providerInvoicesThunk";
 
 const initialState = {
 
@@ -73,8 +74,28 @@ const providerInvoicesSlice = createSlice({
       //     (i) => i.ProviderInvoiceId !== action.payload
       //   );
       // });
+      .addCase(deleteProviderInvoicesByDateRange.fulfilled, (state, action) => {
+        // אפשר לרענן את הרשימה מחדש או לסנן את החשבוניות מהרשימה המקומית
+        const { id, startDate, endDate } = action.payload;
+        state.providerInvoicesList = state.providerInvoicesList.filter(
+          (invoice) =>
+            invoice.ProviderId !== id ||
+            invoice.ProviderInvoiceDate < startDate ||
+            invoice.ProviderInvoiceDate > endDate
+        );
+      })
+
+      .addCase(deleteProvidersInvoicesByDateRange.fulfilled, (state, action) => {
+        const { startDate, endDate } = action.payload;
+        state.providerInvoicesList = state.providerInvoicesList.filter(
+          (invoice) =>
+            invoice.ProviderInvoiceDate < startDate ||
+            invoice.ProviderInvoiceDate > endDate
+        );
+      })
+
   },
 });
 
-export const { setIsInvoice} = providerInvoicesSlice.actions;
+export const { setIsInvoice } = providerInvoicesSlice.actions;
 export default providerInvoicesSlice.reducer;

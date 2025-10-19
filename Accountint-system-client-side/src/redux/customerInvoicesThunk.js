@@ -109,3 +109,31 @@ export const deleteCustomersInvoicesByYear = createAsyncThunk(
   }
 );
 
+// מחיקת חשבוניות ללקוח לפי טווח תאריכים
+export const deleteCustomerInvoicesByDateRange = createAsyncThunk(
+  'customerInvoices/deleteCustomerInvoicesByDateRange',
+  async ({ id, startDate, endDate }, thunkAPI) => {
+    try {
+    const respond=  await api.delete(`/CustomerInvoice/byDateRange?id=${id}&startDate=${startDate}&endDate=${endDate}`);
+      console.log("respond",respond.data,respond.status);
+      return respond.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.response?.data || error.message);
+    }
+  }
+);
+
+// מחיקת כל החשבוניות לפי טווח תאריכים (ללא מזהה לקוח)
+export const deleteCustomersInvoicesByDateRange = createAsyncThunk(
+  'customersInvoices/deleteCustomersInvoicesByDateRange',
+  async ({ startDate, endDate }, thunkAPI) => {
+    try {
+      await api.delete(`/CustomerInvoice/byDateRangeAll?startDate=${startDate}&endDate=${endDate}`);
+      return { startDate, endDate };
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.response?.data || error.message);
+    }
+  }
+);
+
+

@@ -1,34 +1,34 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { fetchSuppliers, addSupplier, updateSupplier, deleteSupplier, fetchOneSupplier } from './suppliersThunk';
+import { fetchSuppliers, addSupplier, updateSupplier, deleteSupplier, fetchOneSupplier, fetchIsInSuppliers, setIsInSuppliersOnServer } from './suppliersThunk';
 
 const initialState = {
 
-    supplierDetailsList: [],
-    currentSupplier: null,
-    IsInSupliers:false,
-    isLoading:false,
-    error:false
+  supplierDetailsList: [],
+  currentSupplier: null,
+  IsInSupliers:null,
+  isLoading: false,
+  error: false
 }
 const SuppliersSlice = createSlice({
-    name: "Suppliers",
-    initialState,
-    reducers: {
-      setIsInvoice: (state, action) => {
-            const { id, isInvoice } = action.payload;
-            const invoiceIndex = state.InvoicesAndPaymentsList.findIndex(item => item.id === id);
-            if (invoiceIndex !== -1) {
-              state.InvoicesAndPaymentsList[invoiceIndex].isInvoice = isInvoice; // No changes needed here
-            } else {
-              console.error(`Invoice with id ${id} not found!`);
-            }
-          },     
-    setIsInSupliers:(state,action)=>{
-        state.IsInSupliers=action.payload;
+  name: "Suppliers",
+  initialState,
+  reducers: {
+    setIsInvoice: (state, action) => {
+      const { id, isInvoice } = action.payload;
+      const invoiceIndex = state.InvoicesAndPaymentsList.findIndex(item => item.id === id);
+      if (invoiceIndex !== -1) {
+        state.InvoicesAndPaymentsList[invoiceIndex].isInvoice = isInvoice; // No changes needed here
+      } else {
+        console.error(`Invoice with id ${id} not found!`);
+      }
+    },
+    setIsInSupliers: (state, action) => {
+      state.IsInSupliers = action.payload;
     }
 
-    },
-    extraReducers: (builder) => {
-      builder
+  },
+  extraReducers: (builder) => {
+    builder
       .addCase(fetchSuppliers.pending, (state) => {
         state.isLoading = true;
       })
@@ -102,8 +102,16 @@ const SuppliersSlice = createSlice({
         state.isLoading = false;
         state.error = true; // If there’s an error, set error to true
       });
-  
-      }
+    builder
+      .addCase(fetchIsInSuppliers.pending, state => { state.isLoading = true; })
+      .addCase(fetchIsInSuppliers.fulfilled, (state, action) => { state.isLoading = false; state.IsInSupliers = action.payload; })
+      .addCase(fetchIsInSuppliers.rejected, state => { state.isLoading = false; state.error = true; });
+
+    builder
+      .addCase(setIsInSuppliersOnServer.pending, state => { state.isLoading = true; })
+      .addCase(setIsInSuppliersOnServer.fulfilled, (state, action) => { state.isLoading = false; state.IsInSupliers = action.payload; })
+      .addCase(setIsInSuppliersOnServer.rejected, state => { state.isLoading = false; state.error = true; });
+  }
 });
 
 export const { setIsInvoice, setIsInSupliers } = SuppliersSlice.actions;

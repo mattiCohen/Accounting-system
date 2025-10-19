@@ -34,7 +34,7 @@ export const addCard = createAsyncThunk(
       console.log('Card added successfully:', response.data);
       return {
         ...cardData,
-        CardId: response.data // מחזיר ID חדש משרת
+        cardId: response.data // מחזיר ID חדש משרת
       };
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response?.data || error.message);

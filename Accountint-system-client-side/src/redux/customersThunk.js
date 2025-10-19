@@ -7,7 +7,8 @@ export const fetchCustomers = createAsyncThunk(
   'customers/fetchCustomers',
   async (_, thunkAPI) => {
     try {
-      const response = await api.get('/Customer');  // שליחה של בקשה ל-API
+      const response = await api.get('/Customer');  
+      console.log(response.data);
       return response.data; // מחזירה את התשובה (רשימת הלקוחות)
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response?.data || error.message); // אם יש שגיאה, מחזירה אותה
@@ -62,7 +63,7 @@ export const updateCustomer = createAsyncThunk(
     'customers/fetchOneCustomer',
     async (id, thunkAPI) => {
       try {
-        const response = await api.get(`/customer/${id}`);
+        const response = await api.get(`/Customer/${id}`);
         return response.data; // מחזיר את פרטי הלקוח
       } catch (error) {
         return thunkAPI.rejectWithValue(error.response?.data || error.message); // אם יש שגיאה, מחזיר אותה
