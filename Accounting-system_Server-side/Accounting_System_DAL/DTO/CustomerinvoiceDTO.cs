@@ -14,11 +14,11 @@ namespace Accounting_System_DAL.DTO
         public int CardId { get; set; }
         public float CustomerInvoiceSum { get; set; }
         public DateTime CustomerInvoiceDate { get; set; }
-        public DateTime CustomerInvoiceMaturitDate { get; set; }
+        public DateTime CustomerInvoiceMaturityDate { get; set; }
         public string? CustomerInvoiceDetails { get; set; }
         public string? CustomerInvoiceNumber { get; set; }
         public CustomerDTO ?CustomerNavigation { get; set; }// = null!;
-        public CardDTO ?CardNavigation { get; set; } //= null!;
+        public CardDTO CardNavigation { get; set; } //= null!;
 
 
         public CustomerinvoiceDTO(Customerinvoice c)
@@ -30,7 +30,7 @@ namespace Accounting_System_DAL.DTO
                 CardId = c.CardId;
                 CustomerInvoiceSum = c.CustomerInvoiceSum;
                 CustomerInvoiceDate = c.CustomerInvoiceDate;
-                CustomerInvoiceMaturitDate = c.CustomerInvoiceMaturityDate;
+                CustomerInvoiceMaturityDate = c.CustomerInvoiceMaturityDate;
                 CustomerInvoiceDetails = c.CustomerInvoiceDetails;
                 CustomerInvoiceNumber = c.CustomerInvoiceNumber;
                 CustomerNavigation = new CustomerDTO(c.CustomerNavigation);

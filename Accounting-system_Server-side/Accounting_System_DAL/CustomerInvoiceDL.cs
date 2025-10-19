@@ -49,6 +49,7 @@ namespace Accounting_System_DAL
                 CustomerInvoiceSum = CustomerInvoice.CustomerInvoiceSum,
                 CustomerInvoiceDetails = CustomerInvoice.CustomerInvoiceDetails,
                 CustomerInvoiceDate = CustomerInvoice.CustomerInvoiceDate,
+                CustomerInvoiceMaturityDate = CustomerInvoice.CustomerInvoiceMaturityDate,
                 CustomerInvoiceNumber = CustomerInvoice.CustomerInvoiceNumber,
                 CustomerId = CustomerInvoice.CustomerId
 
@@ -66,12 +67,14 @@ namespace Accounting_System_DAL
                 .FirstOrDefaultAsync();
             if (invoiceUpdate != null)
             {
+                invoiceUpdate.CustomerId = CustomerInvoice.CustomerId;
                 invoiceUpdate.CardId = CustomerInvoice.CardId;
                 invoiceUpdate.CustomerInvoiceSum = CustomerInvoice.CustomerInvoiceSum;
                 invoiceUpdate.CustomerInvoiceDetails = CustomerInvoice.CustomerInvoiceDetails;
                 invoiceUpdate.CustomerInvoiceDate = CustomerInvoice.CustomerInvoiceDate;
+                invoiceUpdate.CustomerInvoiceMaturityDate= CustomerInvoice.CustomerInvoiceMaturityDate;
                 invoiceUpdate.CustomerInvoiceNumber = CustomerInvoice.CustomerInvoiceNumber;
-                invoiceUpdate.CustomerId = CustomerInvoice.CustomerId;
+              
                 await softwareContextDB.SaveChangesAsync();
                 return "Success";
             }
@@ -150,5 +153,46 @@ namespace Accounting_System_DAL
             }
             return msg;
         }
+        public async Task<string> DeleteCustomerInvoicesByDateRangeAsync(int id, DateTime startDate, DateTime endDate)
+        {
+            string msg = "Success";
+            try
+            {
+                var invoices = softwareContextDB.Customerinvoices
+                    .Where(c => c.CustomerNavigation.CustomerId == id &&
+                                c.CustomerInvoiceDate >= startDate &&
+                                c.CustomerInvoiceDate <= endDate)
+                    .ToList();
+
+                softwareContextDB.Customerinvoices.RemoveRange(invoices);
+                await softwareContextDB.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                msg = "Failed";
+            }
+            return msg;
+        }
+
+        public async Task<string> DeleteCustomersInvoicesByDateRangeAsync(DateTime startDate, DateTime endDate)
+        {
+            string msg = "Success";
+            try
+            {
+                var invoices = softwareContextDB.Customerinvoices
+                    .Where(c => c.CustomerInvoiceDate >= startDate &&
+                                c.CustomerInvoiceDate <= endDate)
+                    .ToList();
+
+                softwareContextDB.Customerinvoices.RemoveRange(invoices);
+                await softwareContextDB.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                msg = "Failed";
+            }
+            return msg;
+        }
+
     }
 }

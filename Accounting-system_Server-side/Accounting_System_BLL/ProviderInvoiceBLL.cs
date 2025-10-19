@@ -50,5 +50,15 @@ namespace Accounting_System_BLL
         {
             return await providerInvoiceDL.DeleteProvidersInvoicesByYearAsync(year);
         }
+        public async Task<string> DeleteProviderInvoicesByDateRangeAsync(int providerId, DateTime startDate, DateTime endDate)
+        {
+            return await providerInvoiceDL.DeleteProviderInvoicesByDateRangeAsync(providerId, startDate, endDate);
+        }
+
+        public async Task<string> DeleteProvidersInvoicesByDateRangeAsync(DateTime startDate, DateTime endDate)
+        {
+            return await providerInvoiceDL.DeleteProvidersInvoicesByDateRangeAsync(startDate, endDate);
+        }
+
     }
 }

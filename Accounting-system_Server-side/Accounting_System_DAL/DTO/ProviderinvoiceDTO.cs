@@ -32,7 +32,8 @@ namespace Accounting_System_DAL.DTO
                 ProviderInvoiceDate = p.ProviderInvoiceDate; 
                 ProviderInvoicePaymentDate = p.ProviderInvoicePaymentDate;
                 ProviderInvoiceDetails = p.ProviderInvoiceDetails;
-                Card=new CardDTO(p.Card);
+                ProviderInvoiceNumber = p.ProviderInvoiceNumber;
+                Card =new CardDTO(p.Card);
                 Provider = new ProvidersDTO(p.Provider);
             }
         }

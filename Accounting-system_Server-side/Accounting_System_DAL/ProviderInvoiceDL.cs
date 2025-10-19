@@ -48,6 +48,7 @@ namespace Accounting_System_DAL
                 CardId = providerInvoice.CardId,
                 ProviderInvoiceSum = providerInvoice.ProviderInvoiceSum,
                 ProviderInvoiceDate = providerInvoice.ProviderInvoiceDate,
+                ProviderInvoicePaymentDate = providerInvoice.ProviderInvoicePaymentDate,
                 ProviderInvoiceDetails = providerInvoice.ProviderInvoiceDetails,
                 ProviderInvoiceNumber = providerInvoice.ProviderInvoiceNumber
 
@@ -65,11 +66,12 @@ namespace Accounting_System_DAL
                 .FirstOrDefaultAsync();
             if (invoiceUpdate != null)
             {
-                invoiceUpdate.ProviderInvoiceId = providerInvoice.ProviderInvoiceId;
                 invoiceUpdate.ProviderId = providerInvoice.ProviderId;
                 invoiceUpdate.CardId = providerInvoice.CardId;
                 invoiceUpdate.ProviderInvoiceSum = providerInvoice.ProviderInvoiceSum;
                 invoiceUpdate.ProviderInvoiceDate = providerInvoice.ProviderInvoiceDate;
+                invoiceUpdate.ProviderInvoicePaymentDate = providerInvoice.ProviderInvoicePaymentDate;
+                invoiceUpdate.ProviderInvoiceNumber = providerInvoice.ProviderInvoiceNumber;
                 invoiceUpdate.ProviderInvoiceDetails = providerInvoice.ProviderInvoiceDetails;
                 await softwareContextDB.SaveChangesAsync();
                 return "Success";
@@ -147,5 +149,46 @@ namespace Accounting_System_DAL
             }
             return msg;
         }
+        public async Task<string> DeleteProviderInvoicesByDateRangeAsync(int providerId, DateTime startDate, DateTime endDate)
+        {
+            string msg = "Success";
+            try
+            {
+                var invoices = softwareContextDB.Providerinvoices
+                    .Where(c => c.ProviderId == providerId &&
+                                c.ProviderInvoiceDate >= startDate &&
+                                c.ProviderInvoiceDate <= endDate)
+                    .ToList();
+
+                softwareContextDB.Providerinvoices.RemoveRange(invoices);
+                await softwareContextDB.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                msg = "Failed";
+            }
+            return msg;
+        }
+
+        public async Task<string> DeleteProvidersInvoicesByDateRangeAsync(DateTime startDate, DateTime endDate)
+        {
+            string msg = "Success";
+            try
+            {
+                var invoices = softwareContextDB.Providerinvoices
+                    .Where(c => c.ProviderInvoiceDate >= startDate &&
+                                c.ProviderInvoiceDate <= endDate)
+                    .ToList();
+
+                softwareContextDB.Providerinvoices.RemoveRange(invoices);
+                await softwareContextDB.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                msg = "Failed";
+            }
+            return msg;
+        }
+
     }
 }

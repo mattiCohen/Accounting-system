@@ -1,22 +1,22 @@
 using Accounting_System_BLL;
 using Accounting_System_DAL;
 using Accounting_System_DAL.Models;
+using Accounting_System_DAL.AppState;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowLocalhost", builder =>
-        builder.WithOrigins("http://localhost:5173") // הכתובת של ה-React שלך
+    options.AddPolicy("AllowFrontend", builder =>
+        builder.WithOrigins( "http://localhost:8080", "http://localhost:3333"
+) 
                .AllowAnyMethod()
                .AllowAnyHeader());
 });
 
-// Add services to the container.
-
 builder.Services.AddControllers();
-builder.Services.AddControllers().AddNewtonsoftJson();//המרה של המזהה שמקשר לטבלה לסוג של העמודה
+builder.Services.AddControllers().AddNewtonsoftJson();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -39,25 +39,29 @@ builder.Services.AddScoped(typeof(IProviderInvoiceDL), typeof(ProviderInvoiceDL)
 builder.Services.AddScoped(typeof(IProviderInvoiceBLL), typeof(ProviderInvoiceBLL));
 builder.Services.AddScoped(typeof(IProviderDL), typeof(ProviderDL));
 builder.Services.AddScoped(typeof(IProviderBLL), typeof(ProviderBLL));
+builder.Services.AddSingleton<IUIStateService, UIStateService>();
 
 builder.Services.AddControllersWithViews()
               .AddNewtonsoftJson(options =>
           options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.ListenAnyIP(80); 
+});
+
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
 
 app.UseRouting();
 
-app.UseCors("AllowLocalhost"); // הפעלת ה-CORS שהגדרת
+app.UseCors("AllowFrontend"); 
 
 app.UseAuthorization();
 

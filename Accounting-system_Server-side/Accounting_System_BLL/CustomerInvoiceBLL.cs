@@ -1,53 +1,64 @@
 ﻿using Accounting_System_DAL;
 using Accounting_System_DAL.DTO;
+using Accounting_System_DAL.Models;
 
-namespace Accounting_System_BLL
+namespace Accounting_System_BLL;
+
+public class CustomerInvoiceBLL : ICustomerInvoiceBLL
 {
-    public class CustomerInvoiceBLL:ICustomerInvoiceBLL
+    private readonly ICustomerInvoiceDL customerInvoiceDL;
+
+    public CustomerInvoiceBLL(ICustomerInvoiceDL _customerInvoiceDL)
     {
-        private readonly ICustomerInvoiceDL customerInvoiceDL;
+        this.customerInvoiceDL = _customerInvoiceDL;
+    }
 
-        public CustomerInvoiceBLL(ICustomerInvoiceDL _customerInvoiceDL)
-        {
-            this.customerInvoiceDL = _customerInvoiceDL;
-        }
+    public async Task<List<CustomerinvoiceDTO>> GetCustomerInvoicesAsync()
+    {
+        return await customerInvoiceDL.GetCustomerInvoicesAsync();
+    }
 
-        public async Task<List<CustomerinvoiceDTO>> GetCustomerInvoicesAsync()
-        {
-            return await customerInvoiceDL.GetCustomerInvoicesAsync();
-        }
+    public async Task<CustomerinvoiceDTO> GetCustomerInvoiceAsync(int id)
+    {
+        return await customerInvoiceDL.GetCustomerInvoiceAsync(id);
+    }
 
-        public async Task<CustomerinvoiceDTO> GetCustomerInvoiceAsync(int id)
-        {
-            return await customerInvoiceDL.GetCustomerInvoiceAsync(id);
-        }
+    public async Task<int> InsertCustomerInvoiceAsync(CustomerinvoiceDTO customerInvoice)
+    {
+        return await customerInvoiceDL.InsertCustomerInvoiceAsync(customerInvoice);
+    }
 
-        public async Task<int> InsertCustomerInvoiceAsync(CustomerinvoiceDTO customerInvoice)
-        {
-            return await customerInvoiceDL.InsertCustomerInvoiceAsync(customerInvoice);
-        }
+    public async Task<string> UpdateCustomerInvoiceAsync(int id, CustomerinvoiceDTO customerInvoice)
+    {
+        return await customerInvoiceDL.UpdateCustomerInvoiceAsync(id, customerInvoice);
+    }
 
-        public async Task<string> UpdateCustomerInvoiceAsync(int id, CustomerinvoiceDTO customerInvoice)
-        {
-            return await customerInvoiceDL.UpdateCustomerInvoiceAsync(id, customerInvoice);
-        }
+    public async Task<string> DeleteCustomerInvoiceAsync(int id)
+    {
+        return await customerInvoiceDL.DeleteCustomerInvoiceAsync(id);
+    }
+    public async Task<string> DeleteCustomerInvoicesAsync(int id)
+    {
+        return await customerInvoiceDL.DeleteCustomerInvoicesAsync(id);
+    }
 
-        public async Task<string> DeleteCustomerInvoiceAsync(int id)
-        {
-            return await customerInvoiceDL.DeleteCustomerInvoiceAsync(id);
-        }
-        public async Task<string> DeleteCustomerInvoicesAsync(int id)
-        {
-            return await customerInvoiceDL.DeleteCustomerInvoicesAsync(id);
-        }
+    public async Task<string> DeleteCustomerInvoicesByYearAsync(int id, int year)
+    {
+        return await customerInvoiceDL.DeleteCustomerInvoicesByYearAsync(id, year);
+    }
 
-        public async Task<string> DeleteCustomerInvoicesByYearAsync(int id, int year)
-        {
-            return await customerInvoiceDL.DeleteCustomerInvoicesByYearAsync(id,year); 
-        }
+    public async Task<string> DeleteCustomersInvoicesByYearAsync(int year)
+    {
+        return await customerInvoiceDL.DeleteCustomersInvoicesByYearAsync(year);
+    }
 
-        public async Task<string> DeleteCustomersInvoicesByYearAsync(int year)
-        {
-            return await customerInvoiceDL.DeleteCustomersInvoicesByYearAsync( year);        }
+    public async Task<string> DeleteCustomerInvoicesByDateRangeAsync(int id, DateTime startDate, DateTime endDate)
+    {
+        return await customerInvoiceDL.DeleteCustomerInvoicesByDateRangeAsync(id, startDate, endDate);
+    }
+
+    public async Task<string> DeleteCustomersInvoicesByDateRangeAsync(DateTime startDate, DateTime endDate)
+    {
+        return await customerInvoiceDL.DeleteCustomersInvoicesByDateRangeAsync(startDate, endDate);
     }
 }

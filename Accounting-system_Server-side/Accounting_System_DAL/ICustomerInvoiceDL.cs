@@ -17,6 +17,9 @@ namespace Accounting_System_DAL
         Task<string> DeleteCustomerInvoicesAsync(int id);
         Task<string> DeleteCustomerInvoicesByYearAsync(int id, int year);
         Task<string> DeleteCustomersInvoicesByYearAsync(int year);
+        Task<string> DeleteCustomersInvoicesByDateRangeAsync(DateTime startDate, DateTime endDate);
+        Task<string> DeleteCustomerInvoicesByDateRangeAsync(int id, DateTime startDate, DateTime endDate);
+
 
     }
 }

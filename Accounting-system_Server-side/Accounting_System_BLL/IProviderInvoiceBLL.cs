@@ -17,6 +17,10 @@ namespace Accounting_System_BLL
         Task<string> DeleteProviderInvoicesAsync(int id);
         Task<string> DeleteProviderInvoicesByYearAsync(int id, int year);
         Task<string> DeleteProvidersInvoicesByYearAsync(int year);
+        Task<string> DeleteProvidersInvoicesByDateRangeAsync(DateTime startDate, DateTime endDate);
+        Task<string> DeleteProviderInvoicesByDateRangeAsync(int providerId, DateTime startDate, DateTime endDate);
+
+
 
     }
 }

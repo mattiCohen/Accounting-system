@@ -29,7 +29,7 @@ namespace Accounting_System_API.Controllers
         }
 
         [HttpPost]
-        public async Task<int> GetCustomers(CustomerDTO customer)
+        public async Task<int> InsertCustomers(CustomerDTO customer)
         {
             return await customerBLL.InsertCustomerAsync(customer);
         }

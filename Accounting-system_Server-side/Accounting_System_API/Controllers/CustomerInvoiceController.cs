@@ -60,5 +60,17 @@ namespace Accounting_System_API.Controllers
         {
             return await customerInvoiceBLL.DeleteCustomersInvoicesByYearAsync(year);
         }
+        [HttpDelete("byDateRange")]
+        public async Task<string> DeleteCustomerInvoicesByDateRange(int id, DateTime startDate, DateTime endDate)
+        {
+            return await customerInvoiceBLL.DeleteCustomerInvoicesByDateRangeAsync(id, startDate, endDate);
+        }
+
+        [HttpDelete("byDateRangeAll")]
+        public async Task<string> DeleteCustomersInvoicesByDateRange(DateTime startDate, DateTime endDate)
+        {
+            return await customerInvoiceBLL.DeleteCustomersInvoicesByDateRangeAsync(startDate, endDate);
+        }
+
     }
 }

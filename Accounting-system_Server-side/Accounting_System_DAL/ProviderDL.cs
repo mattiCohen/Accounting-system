@@ -7,10 +7,16 @@ namespace Accounting_System_DAL
     public class ProviderDL : IProviderDL
     {
         private readonly softwareContext softwareContextDB;
+        private static int _lastCardNumber = -1;
 
         public ProviderDL(softwareContext _softwareContextDB)
         {
             this.softwareContextDB = _softwareContextDB;
+            if (_lastCardNumber == -1)
+            {
+                _lastCardNumber = softwareContextDB.Providers.
+                    Max(p => (int?)p.ProviderCardNumber) ?? 1;
+            }
         }
 
         public async Task<List<ProvidersDTO>> GetProvidersAsync()
@@ -48,27 +54,26 @@ namespace Accounting_System_DAL
 
         public async Task<int> InsertproviderAsync(ProvidersDTO provider)
         {
+            _lastCardNumber++;
             Provider providerNew = new Provider() 
             { 
                 ProviderName = provider.ProviderName,
-                ProviderId = provider.ProviderId,
                 ProviderAddress = provider.ProviderAddress,
-                ProviderCardNumber = provider.ProviderCardNumber,
+                ProviderCardNumber = _lastCardNumber,
                 ProviderContactName = provider.ProviderContactName,
                 ProviderEmail = provider.ProviderEmail,
                 ProviderPhoneNumber = provider.ProviderPhoneNumber
             };
             softwareContextDB.Providers.Add(providerNew);
-            return await softwareContextDB.SaveChangesAsync();
-            //TODO - לבדוק איך מחזירם את הid שנוסף לדטבייס
+             await softwareContextDB.SaveChangesAsync();
+            return providerNew.ProviderId;
         }
 
         public async Task<string> UpdateProviderAsync(int id, ProvidersDTO provider)
         {
-            Provider providerUpdate = softwareContextDB.Providers.Where(p => p.ProviderId == id).FirstOrDefault();
+            Provider providerUpdate = softwareContextDB.Providers.FirstOrDefault(p => p.ProviderId == id);
             if(providerUpdate != null)
             {
-                providerUpdate.ProviderId = provider.ProviderId;
                 providerUpdate.ProviderName = provider.ProviderName;
                 providerUpdate.ProviderPhoneNumber = provider.ProviderPhoneNumber;
                 providerUpdate.ProviderCardNumber = provider.ProviderCardNumber;

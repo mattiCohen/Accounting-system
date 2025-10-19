@@ -11,13 +11,19 @@ namespace Accounting_System_DAL
 {
     public class CustomerDL  :  ICustomerDL
     {
-      
+        private static int _lastCardNumber = -1;
+
             private readonly softwareContext softwareContextDB;
 
             public CustomerDL(softwareContext _softwareContextDB)
             {
                 this.softwareContextDB = _softwareContextDB;
+            if (_lastCardNumber == -1)
+            {
+                _lastCardNumber = softwareContextDB.Customers
+                .Max(c => (int?)c.CustomerCardNumber) ?? 1;
             }
+        }
 
             public async Task<List<CustomerDTO>> GetCustomersAsync()
             {
@@ -42,6 +48,7 @@ namespace Accounting_System_DAL
 
             public async Task<int> InsertCustomerAsync(CustomerDTO customer)
             {
+            _lastCardNumber++;
             Customer customerNew = new Customer()
             {
                 CustomerName = customer.CustomerName,
@@ -49,16 +56,17 @@ namespace Accounting_System_DAL
                 CustomerEmail = customer.CustomerEmail,
                 CustomerPhoneNumber = customer.CustomerPhoneNumber,
                 CustomerContactName = customer.CustomerContactName,
-                CustomerCardNumber = customer.CustomerCardNumber
+                CustomerCardNumber = _lastCardNumber
             };
                 softwareContextDB.Customers.Add(customerNew);
-                return await softwareContextDB.SaveChangesAsync();
-                //TODO - לבדוק איך מחזירם את הid שנוסף לדטבייס
+                await softwareContextDB.SaveChangesAsync();
+            return customerNew.CustomerId;
+
             }
 
             public async Task<string> UpdateCustomerAsync(int id, CustomerDTO customer)
             {
-                Customer customerUpdate = softwareContextDB.Customers.Where(c => c.CustomerId == id).FirstOrDefault();
+                Customer customerUpdate = softwareContextDB.Customers.FirstOrDefault(c => c.CustomerId == id);
                 if (customerUpdate != null)
                 {
                 customerUpdate.CustomerName = customer.CustomerName;
@@ -66,7 +74,6 @@ namespace Accounting_System_DAL
                 customerUpdate.CustomerEmail = customer.CustomerEmail;
                 customerUpdate.CustomerPhoneNumber = customer.CustomerPhoneNumber;
                 customerUpdate.CustomerContactName = customer.CustomerContactName;
-                customerUpdate.CustomerCardNumber = customer.CustomerCardNumber;
 
                     await softwareContextDB.SaveChangesAsync();
                     return "Success";
