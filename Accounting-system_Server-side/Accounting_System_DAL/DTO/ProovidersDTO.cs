@@ -16,7 +16,8 @@ namespace Accounting_System_DAL.DTO
         public string ProviderEmail { get; set; }
         public string ProviderContactName { get; set; }
         public int ProviderCardNumber { get; set; }
-      
+        public int? CategoryId { get; set; }
+
 
         public ProvidersDTO(Provider p)
         {
@@ -29,6 +30,7 @@ namespace Accounting_System_DAL.DTO
                 ProviderEmail = p.ProviderEmail;
                 ProviderContactName = p.ProviderContactName;
                 ProviderCardNumber = p.ProviderCardNumber??0;
+                CategoryId = p.CategoryId;
             }
         }
     }

@@ -1,0 +1,10 @@
+*.tar
+*.sql
+run.txt
+run.vbs
+start-app.bat
+start-app.txt
+docker-compose.yml
+mysql-server/
+nginx-server/
+גיבוי/

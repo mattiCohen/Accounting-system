@@ -56,7 +56,8 @@ namespace Accounting_System_DAL
                 CustomerEmail = customer.CustomerEmail,
                 CustomerPhoneNumber = customer.CustomerPhoneNumber,
                 CustomerContactName = customer.CustomerContactName,
-                CustomerCardNumber = _lastCardNumber
+                CustomerCardNumber = _lastCardNumber,
+                 CategoryId = customer.CategoryId
             };
                 softwareContextDB.Customers.Add(customerNew);
                 await softwareContextDB.SaveChangesAsync();
@@ -74,8 +75,9 @@ namespace Accounting_System_DAL
                 customerUpdate.CustomerEmail = customer.CustomerEmail;
                 customerUpdate.CustomerPhoneNumber = customer.CustomerPhoneNumber;
                 customerUpdate.CustomerContactName = customer.CustomerContactName;
+                customerUpdate.CategoryId = customer.CategoryId;
 
-                    await softwareContextDB.SaveChangesAsync();
+                await softwareContextDB.SaveChangesAsync();
                     return "Success";
                 }
                 return "No Success";

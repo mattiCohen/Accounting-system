@@ -10,6 +10,8 @@ import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
 import { useRef } from "react";
 import CardNumberButton from "../InvoiceAndPayment/CardNumberButton";
+import { MenuItem } from '@mui/material';
+import { fetchCategories } from "../../../redux/CategoryThunk";
 
 const SupplierUpdate = () => {
 
@@ -98,6 +100,14 @@ const SupplierUpdate = () => {
     const [email, setEmail] = useState("");
     const [address, setAddress] = useState("");
     const [numCard, setNumCard] = useState(null);
+    const [categoryId, setCategoryId] = useState("");
+const categories = useSelector(state => state.category?.categories ?? []);
+const filteredCategories = categories.filter(
+    c => c.categoryClassification === (IsInsupplier1 ? 2 : 1)
+);
+useEffect(() => {
+    if (categories.length === 0) dispatch(fetchCategories());
+}, [dispatch, categories.length]);
 
     useEffect(() => {
         window.scrollTo(0, 0);
@@ -137,6 +147,7 @@ const SupplierUpdate = () => {
         setPhone(phoneFromStore || "");
         setEmail(emailFromStore || "");
         setAddress(addressFromStore || "");
+        setCategoryId(newSupplier.categoryId ?? "");
     }, [newSupplier, IsInsupplier1]);
 
     const updateSupplier1 = async (e) => {
@@ -151,7 +162,8 @@ const SupplierUpdate = () => {
                 ProviderAddress: address,
                 ProviderEmail: email,
                 ProviderContactName: "",
-                ProviderCardNumber: numCard?.label || ""
+                ProviderCardNumber: numCard?.label || "",
+                CategoryId: categoryId === "" ? null : categoryId,
             }
             try {
 
@@ -175,7 +187,8 @@ const SupplierUpdate = () => {
                 CustomerAddress: address,
                 CustomerEmail: email,
                 CustomerContactName: "",
-                CustomerCardNumber: numCard?.label || ""
+                CustomerCardNumber: numCard?.label || "",
+                CategoryId: categoryId === "" ? null : categoryId,
             }
             try {
                 await dispatch(updateCustomer({ id: numericId, CustomerData: updatedSupplier })).unwrap();
@@ -186,8 +199,7 @@ const SupplierUpdate = () => {
             }
             catch (error) {
                 console.error("Error updating customer:", error);
-                showSnackbar("העדכון בוצע בהצלחה", "success");
-                setTimeout(() => navigate("/InCome/CustomerDetails"), 1000);
+showSnackbar("שגיאה בעדכון הלקוח", "error");
             }
         }
 
@@ -302,6 +314,22 @@ const SupplierUpdate = () => {
                             onKeyDown={(e) => handleKeyDown(e, "button")}
 
                         />
+                        <TextField
+    select
+    label="קטגוריה"
+    value={categoryId}
+    onChange={(e) => setCategoryId(e.target.value)}
+    fullWidth
+    variant="outlined"
+    disabled={formDisabled}
+    sx={textFieldSx}
+    InputLabelProps={inputLabelProps}
+>
+    <MenuItem value="">ללא קטגוריה</MenuItem>
+    {filteredCategories.map(c => (
+        <MenuItem key={c.categoryId} value={c.categoryId}>{c.categoryName}</MenuItem>
+    ))}
+</TextField>
 {/* 
                         <TextField label="שם איש קשר" value={contactName}
                             onChange={(e) => setContactName(e.target.value)} fullWidth variant="outlined"

@@ -17,7 +17,9 @@ namespace Accounting_System_DAL.Models
         public string? ProviderEmail { get; set; }
         public string? ProviderContactName { get; set; }
         public int? ProviderCardNumber { get; set; }
+        public int? CategoryId { get; set; }
 
+    public virtual Category? Category { get; set; }
         public virtual ICollection<Providerinvoice> Providerinvoices { get; set; }
     }
 }

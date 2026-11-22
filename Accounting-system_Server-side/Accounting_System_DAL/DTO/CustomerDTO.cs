@@ -16,6 +16,7 @@ namespace Accounting_System_DAL.DTO
         public string CustomerEmail { get; set; }
         public string CustomerContactName { get; set; }
         public int CustomerCardNumber { get; set; }
+        public int? CategoryId { get; set; }
 
         public CustomerDTO(Customer c)
         {
@@ -28,6 +29,8 @@ namespace Accounting_System_DAL.DTO
                 CustomerEmail = c.CustomerEmail;
                 CustomerContactName = c.CustomerContactName;
                 CustomerCardNumber = c.CustomerCardNumber??0;
+                CategoryId = c.CategoryId;
+
             }
         }
     }

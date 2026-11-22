@@ -4,6 +4,13 @@ import { Button, TextField, Box, Typography } from '@mui/material';
 import { useNavigate } from "react-router-dom";
 import { addSupplier, fetchSuppliers } from '../../../redux/suppliersThunk';
 import { addCustomer, fetchCustomers } from "../../../redux/customersThunk";
+import { fetchCategories } from "../../../redux/CategoryThunk";
+import {
+  Select,
+  MenuItem,
+  InputLabel,
+  FormControl
+} from "@mui/material";
 import CircularProgress from "@mui/material/CircularProgress";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import Snackbar from "@mui/material/Snackbar";
@@ -25,7 +32,20 @@ const OpeningSupplier = () => {
     const [snackbarMessage, setSnackbarMessage] = useState("");
     const [snackbarSeverity, setSnackbarSeverity] = useState("success");
     const [formDisabled, setFormDisabled] = useState(false);
-    const refs = {
+
+ const [categoryId, setCategoryId] = useState("");
+
+const categories = useSelector(
+    (state) => state.category?.categories ?? []
+);
+const filteredCategories = categories.filter(
+    c => c.categoryClassification === (isSupplier ? 2 : 1)
+);
+useEffect(() => {
+    dispatch(fetchCategories());
+}, [dispatch]);
+
+ const refs = {
         supplierName: useRef(),
         supplierPhone: useRef(),
         supplierEmail: useRef(),
@@ -109,7 +129,8 @@ const OpeningSupplier = () => {
             providerAddress: supplierAddress.toString(),
             providerEmail: supplierEmail.toString(),
             providerContactName: supplierContactName.toString(),
-            providerCardNumber: 0
+            providerCardNumber: 0,
+            categoryId: categoryId ? Number(categoryId) : null
         } : {
 
             customerName: supplierName.toString(),
@@ -117,7 +138,8 @@ const OpeningSupplier = () => {
             customerAddress: supplierAddress.toString(),
             customerEmail: supplierEmail.toString(),
             customerContactName: supplierContactName.toString(),
-            customerCardNumber: 0
+            customerCardNumber: 0,
+            categoryId: categoryId ? Number(categoryId) : null
         };
 
         if (
@@ -147,6 +169,7 @@ const OpeningSupplier = () => {
             setSupplierEmail("");
             setSupplierAddress("");
             setSupplierContactName("");
+            setCategoryId("");
 
             // navigate(isSupplier ? "/Expenses/SupplierDetails" : "/InCome/CustomerDetails");
 
@@ -275,6 +298,7 @@ const OpeningSupplier = () => {
                             inputRef={refs.supplierEmail}
                             onKeyDown={(e) => handleKeyDown(e, "button")}
                         />
+                        
                         {/* <TextField
                             label="שם איש קשר"
                             value={supplierContactName}
@@ -288,7 +312,37 @@ const OpeningSupplier = () => {
                             InputLabelProps={inputLabelProps}
                             inputRef={refs.supplierContactName}
                             onKeyDown={(e) => handleKeyDown(e, "button")}
-                        /> */}
+                        /> */
+                        <FormControl fullWidth disabled={formDisabled}>
+    <InputLabel
+        id="category-label"
+        sx={{ color: "black" }}
+    >
+        קטגוריית ברירת מחדל
+    </InputLabel>
+
+    <Select
+        labelId="category-label"
+        value={categoryId}
+        label="קטגוריית ברירת מחדל"
+        onChange={(e) => setCategoryId(e.target.value)}
+        sx={textFieldSx}
+    >
+        <MenuItem value="">
+            ללא קטגוריה
+        </MenuItem>
+
+        {filteredCategories.map((category) => (
+            <MenuItem
+                key={category.categoryId}
+                value={category.categoryId}
+            >
+                {category.categoryName}
+            </MenuItem>
+        ))}
+    </Select>
+</FormControl>
+                        }
                         <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                             <Button
                                 type="submit"

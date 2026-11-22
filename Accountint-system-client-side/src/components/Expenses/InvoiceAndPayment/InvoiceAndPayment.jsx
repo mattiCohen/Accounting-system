@@ -70,7 +70,7 @@ const updateInvoiceOrpayment=async()=>{
       customerInvoiceId:item.customerInvoiceId,
       customerInvoiceDate:newInvoice.date,
       customerInvoiceDetails:newInvoice.details,
-      customerInvoiceMaturitDate:newInvoice.paymentDate,
+      customerInvoiceMaturityDate:newInvoice.paymentDate,
       customerInvoiceNumber:newInvoice.reference,
       customerInvoiceSum:newInvoice.sum,
       

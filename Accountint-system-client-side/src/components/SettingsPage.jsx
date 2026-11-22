@@ -29,7 +29,7 @@ const SettingsPage = () => {
     const { categories } = useSelector((state) => state.category);
 
     const [newCategoryName, setNewCategoryName] = useState("");
-    const [classificationId, setClassificationId] = useState(1); // 1 = הוצאה, 2 = הכנסה
+    const [classificationId, setClassificationId] = useState(1); // הכנסה 1
     const [filter, setFilter] = useState("all");
     const [editStates, setEditStates] = useState({});
 
@@ -238,7 +238,7 @@ const SettingsPage = () => {
                             ) : (
                                 <Typography sx={{ color: "#5C3D3D" }}>
                                     {cat.categoryName} -{" "}
-                                    {cat.categoryClassification === 1 ? "הוצאה" : "הכנסה"}
+                                    {cat.categoryClassification === 1 ? "הכנסה" : "הוצאה"}
                                 </Typography>
                             )}
 

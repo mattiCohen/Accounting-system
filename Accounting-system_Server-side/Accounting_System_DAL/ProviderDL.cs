@@ -62,7 +62,9 @@ namespace Accounting_System_DAL
                 ProviderCardNumber = _lastCardNumber,
                 ProviderContactName = provider.ProviderContactName,
                 ProviderEmail = provider.ProviderEmail,
-                ProviderPhoneNumber = provider.ProviderPhoneNumber
+                ProviderPhoneNumber = provider.ProviderPhoneNumber,
+                CategoryId = provider.CategoryId
+
             };
             softwareContextDB.Providers.Add(providerNew);
              await softwareContextDB.SaveChangesAsync();
@@ -80,6 +82,7 @@ namespace Accounting_System_DAL
                 providerUpdate.ProviderAddress = provider.ProviderAddress;
                 providerUpdate.ProviderEmail = provider.ProviderEmail;
                 providerUpdate.ProviderContactName = provider.ProviderContactName;
+                providerUpdate.CategoryId = provider.CategoryId;
                 await softwareContextDB.SaveChangesAsync();
                 return "Success";
             }

@@ -17,7 +17,8 @@ namespace Accounting_System_DAL.Models
         public string? CustomerEmail { get; set; }
         public string? CustomerContactName { get; set; }
         public int? CustomerCardNumber { get; set; }
-
+        public int? CategoryId { get; set; }
+        public virtual Category? Category { get; set; }
         public virtual ICollection<Customerinvoice> Customerinvoices { get; set; }
     }
 }

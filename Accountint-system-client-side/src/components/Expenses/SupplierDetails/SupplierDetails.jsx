@@ -15,6 +15,8 @@ import { fetchSuppliers, deleteSupplier } from '../../../redux/suppliersThunk';
 import { fetchCustomers, deleteCustomer } from '../../../redux/customersThunk';
 import CircularProgress from '@mui/material/CircularProgress';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
+import { fetchCategories } from '../../../redux/CategoryThunk';
+import TableSortLabel from '@mui/material/TableSortLabel';
 
 const SupplierDetails = () => {
   const dispatch = useDispatch();
@@ -24,7 +26,28 @@ const SupplierDetails = () => {
   const [selectedRow, setSelectedRow] = useState(null);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  
+  const [orderBy, setOrderBy] = useState(null);   // null = סדר הכנסה
+const [order, setOrder] = useState('asc');
+
+const handleSort = (key) => {
+  if (orderBy !== key) {
+    setOrderBy(key);
+    setOrder('asc');
+  } else if (order === 'asc') {
+    setOrder('desc');
+  } else {
+    setOrderBy(null);       // לחיצה שלישית - חזרה לסדר ההכנסה
+    setOrder('asc');
+  }
+  setPage(0);
+};
+const categories = useSelector(state => state.category?.categories ?? []);
+useEffect(() => {
+  if (categories.length === 0) dispatch(fetchCategories());
+}, [dispatch, categories.length]);
+
+const getCategoryName = (categoryId) =>
+  categories.find(c => c.categoryId === categoryId)?.categoryName || "";
   const handleRowClick = (id) => {
     setSelectedRow(id === selectedRow ? null : id);
   };
@@ -80,21 +103,23 @@ const SupplierDetails = () => {
     </div>
     );
   }
-  const columns = IsInSupliers
-    ? [
-      { label: "מ'ס כרטיס", dataKey: "numCard", width: "20%" },
-      { label: "שם ספק", dataKey: "name", width: "25%" },
-      { label: "כתובת", dataKey: "address", width: "25%" },
-      { label: "טלפון", dataKey: "phone", width: "15%" },
-      { label: "מייל", dataKey: "email", width: "15%" }
-    ]
-    : [
-      { label: "מ'ס כרטיס", dataKey: "numCard", width: "20%" },
-      { label: "שם לקוח", dataKey: "name", width: "30%" },
-      { label: "כתובת", dataKey: "address", width: "30%" },
-      { label: "טלפון", dataKey: "phone", width: "20%" },
-      { label: "מייל", dataKey: "email", width: "20%" }
-    ];
+ const columns = IsInSupliers
+  ? [
+    { label: "מ'ס כרטיס", dataKey: "numCard", width: "10%" },
+    { label: "שם ספק", dataKey: "name", width: "20%" },
+    { label: "כתובת", dataKey: "address", width: "20%" },
+    { label: "טלפון", dataKey: "phone", width: "15%" },
+    { label: "מייל", dataKey: "email", width: "20%" },
+    { label: "קטגוריה", dataKey: "category", width: "15%" },
+  ]
+  : [
+    { label: "מ'ס כרטיס", dataKey: "numCard", width: "10%" },
+    { label: "שם לקוח", dataKey: "name", width: "20%" },
+    { label: "כתובת", dataKey: "address", width: "20%" },
+    { label: "טלפון", dataKey: "phone", width: "15%" },
+    { label: "מייל", dataKey: "email", width: "20%" },
+    { label: "קטגוריה", dataKey: "category", width: "15%" },
+  ];
 
   function createData(supplierData) {
     if (!supplierData) {
@@ -108,7 +133,8 @@ const SupplierDetails = () => {
         name: supplierData.providerName,
         phone: supplierData.providerPhoneNumber,
         address: supplierData.providerAddress,
-        email: supplierData.providerEmail
+        email: supplierData.providerEmail,
+        category: getCategoryName(supplierData.categoryId),
       }
     }
     else {
@@ -119,12 +145,28 @@ const SupplierDetails = () => {
         address: supplierData.customerAddress,
         email: supplierData.customerEmail,
         numCard: supplierData.customerCardNumber,
+        category: getCategoryName(supplierData.categoryId),
       };
       
     }
   }
 
-  const rows = ListOfDetails.map(createData);
+const rows = ListOfDetails.map(createData);
+
+const sortedRows = !orderBy ? rows : [...rows].sort((a, b) => {
+  const av = a[orderBy];
+  const bv = b[orderBy];
+
+  // ערכים ריקים תמיד בסוף
+  if (av == null || av === "") return 1;
+  if (bv == null || bv === "") return -1;
+
+  const cmp = (typeof av === 'number' && typeof bv === 'number')
+    ? av - bv
+    : String(av).localeCompare(String(bv), 'he', { numeric: true });
+
+  return order === 'asc' ? cmp : -cmp;
+});
 
   function fixedHeaderContent() {
     return (
@@ -144,7 +186,13 @@ const SupplierDetails = () => {
               borderRight: index !== columns.length - 1 ? '1px solid #D19793' : 'none' // הוספת גבול בין העמודות
             }}
           >
-            {column.label}
+<TableSortLabel
+  active={orderBy === column.dataKey}
+  direction={orderBy === column.dataKey ? order : 'asc'}
+  onClick={() => handleSort(column.dataKey)}
+>
+  {column.label}
+</TableSortLabel>
           </TableCell>
         ))}
       </TableRow>
@@ -190,7 +238,7 @@ const SupplierDetails = () => {
               {fixedHeaderContent()}
             </TableHead>
             <TableBody>
-              {rows
+              {sortedRows
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 .map((row) => rowContent(null, row))}
             </TableBody>
@@ -199,7 +247,7 @@ const SupplierDetails = () => {
         <TablePagination
           rowsPerPageOptions={[10, 25, 100]}
           component="div"
-          count={rows.length}
+          count={sortedRows.length}
           rowsPerPage={rowsPerPage}
           page={page}
           onPageChange={(e, newPage) => setPage(newPage)}
